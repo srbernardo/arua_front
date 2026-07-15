@@ -1,0 +1,78 @@
+import { SlidersHorizontal, X } from 'lucide-react'
+import { cn } from '../lib/utils'
+
+interface FilterBarProps {
+  open: boolean
+  onToggle: () => void
+  sortBy: string
+  onSortChange: (value: string) => void
+  activeFilters: number
+}
+
+const sortOptions = [
+  { value: 'default', label: 'Padrão' },
+  { value: 'price-asc', label: 'Preço: Menor para Maior' },
+  { value: 'price-desc', label: 'Preço: Maior para Menor' },
+  { value: 'name-asc', label: 'Nome: A-Z' },
+  { value: 'name-desc', label: 'Nome: Z-A' },
+]
+
+export default function FilterBar({ open, onToggle, sortBy, onSortChange, activeFilters }: FilterBarProps) {
+  return (
+    <div className="w-full bg-card">
+      <div className="flex items-center justify-end h-15 px-4 md:px-6">
+        <button
+          onClick={onToggle}
+          className="flex items-center gap-2 h-11 bg-surface rounded-full px-6 cursor-pointer hover:bg-surface/80 transition-colors relative"
+        >
+          <SlidersHorizontal size={20} className="text-foreground-secondary" />
+          <span className="font-body text-sm font-medium text-foreground-secondary">
+            Filtros
+          </span>
+          {activeFilters > 0 && (
+            <span className="w-5 h-5 bg-primary text-white text-[10px] font-semibold rounded-full flex items-center justify-center">
+              {activeFilters}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {open && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 transition-opacity"
+          onClick={onToggle}
+        />
+      )}
+
+      <div
+        className={`fixed top-0 right-0 h-full w-80 bg-card shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
+          open ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="flex items-center justify-between p-6 border-b border-border">
+          <span className="font-heading text-lg font-semibold text-foreground-primary">Ordenar por</span>
+          <button onClick={onToggle} className="cursor-pointer hover:opacity-70 transition-opacity">
+            <X size={20} className="text-foreground-secondary" />
+          </button>
+        </div>
+
+        <div className="flex flex-col p-4 gap-1">
+          {sortOptions.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => { onSortChange(option.value); onToggle(); }}
+              className={cn(
+                'w-full text-left px-4 py-3 rounded-lg font-body text-sm transition-colors cursor-pointer',
+                sortBy === option.value
+                  ? 'bg-primary/10 text-primary font-semibold'
+                  : 'text-foreground-secondary hover:bg-surface hover:text-foreground-primary'
+              )}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}

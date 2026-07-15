@@ -1,0 +1,86 @@
+import { Music } from 'lucide-react'
+
+const linkGroups = [
+  {
+    title: 'Atendimento',
+    links: ['Central de Ajuda', 'Trocas e Devoluções', 'Perguntas Frequentes', 'Seg-Sex: 9h às 18h', 'Sáb: 9h às 14h'],
+  },
+  {
+    title: 'Institucional',
+    links: ['Sobre Nós'],
+  },
+  {
+    title: 'Legal',
+    links: ['Avisos Legais', 'Política de Privacidade', 'Termos de Uso', 'Cookies'],
+  },
+  {
+    title: 'Contato',
+    links: ['contato@bikinistore.com.br', '(11) 99999-9999'],
+  },
+]
+
+const socialIcons = [
+  { icon: Music, label: 'Instagram' },
+  { icon: Music, label: 'Twitter' },
+  { icon: Music, label: 'Facebook' },
+  { icon: Music, label: 'TikTok' },
+]
+
+export default function Footer() {
+  return (
+    <footer className="w-full bg-primary px-4 md:px-10 py-6 md:py-8 flex flex-col gap-0">
+      <div className="flex flex-col md:flex-row md:justify-between w-full gap-6 md:gap-0">
+        <div className="flex flex-col">
+          <span className="font-heading text-2xl font-bold text-white leading-tight">
+            Bikini Store
+          </span>
+          <span className="font-body text-sm text-[#FFF5ED] leading-relaxed">
+            Biquínis feitos para o seu verão
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="font-heading text-sm font-semibold text-white leading-tight">
+            Siga-nos
+          </span>
+          <div className="flex items-center h-11 gap-0">
+            {socialIcons.map(({ icon: Icon, label }) => (
+              <button key={label} className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity">
+                <Icon size={20} className="text-white" />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 md:flex md:justify-between w-full mt-[30px] gap-6 md:gap-0">
+        {linkGroups.map((group) => (
+          <div key={group.title} className="flex flex-col">
+            <span className="font-heading text-sm font-semibold text-white leading-tight mb-1">
+              {group.title}
+            </span>
+            {group.links.map((link) => (
+              <button
+                key={link}
+                className="font-body text-[13px] text-[#FFF5ED] leading-relaxed text-left cursor-pointer hover:text-white transition-colors"
+              >
+                {link}
+              </button>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center w-full mt-[62px] border-t border-white/20 pt-4 md:pt-0 gap-4 md:gap-0">
+        <span className="font-body text-xs text-[#FFE8D6] leading-relaxed">
+          © 2024 Bikini Store. Todos os direitos reservados.
+        </span>
+        <div className="flex items-center gap-0">
+          <button className="font-body text-xs text-[#FFE8D6] cursor-pointer hover:text-white transition-colors">Política de Privacidade</button>
+          <button className="font-body text-xs text-[#FFE8D6] ml-4 cursor-pointer hover:text-white transition-colors">Termos de Serviço</button>
+          <button className="font-body text-xs text-[#FFE8D6] ml-4 cursor-pointer hover:text-white transition-colors">Configurar Cookies</button>
+        </div>
+      </div>
+    </footer>
+  )
+}
