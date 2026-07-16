@@ -9,26 +9,7 @@ interface CategoryBarProps {
 
 export default function CategoryBar({ categories, activeCategory, onCategoryChange }: CategoryBarProps) {
   return (
-    <nav className="w-full h-14 flex items-center gap-4 px-4 md:px-10 py-2 overflow-x-auto scrollbar-hide">
-      <button
-        key="ver-todos"
-        onClick={() => onCategoryChange('ver-todos')}
-        className="relative h-9 flex items-center shrink-0 cursor-pointer"
-      >
-        <span
-          className={cn(
-            'font-body text-sm leading-tight transition-colors',
-            activeCategory === 'ver-todos'
-              ? 'text-foreground-primary font-semibold'
-              : 'text-foreground-secondary font-medium hover:text-foreground-primary'
-          )}
-        >
-          Ver Todos
-        </span>
-        {activeCategory === 'ver-todos' && (
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60px] h-[3px] bg-primary rounded-full" />
-        )}
-      </button>
+    <nav className="w-full h-14 flex items-center gap-4 px-4 md:px-6 py-2 overflow-x-auto scrollbar-hide">
       {categories.map((cat) => (
         <button
           key={cat.id}
@@ -37,10 +18,10 @@ export default function CategoryBar({ categories, activeCategory, onCategoryChan
         >
           <span
             className={cn(
-              'font-body text-sm leading-tight transition-colors',
+              'font-body text-sm leading-tight uppercase tracking-wider transition-colors',
               cat.id === activeCategory
-                ? 'text-foreground-primary font-semibold'
-                : 'text-foreground-secondary font-medium hover:text-foreground-primary'
+              ? 'text-foreground-primary font-bold'
+              : 'text-foreground-secondary font-light hover:text-foreground-primary'
             )}
           >
             {cat.name}
@@ -50,6 +31,25 @@ export default function CategoryBar({ categories, activeCategory, onCategoryChan
           )}
         </button>
       ))}
+      <button
+        key="ver-todos"
+        onClick={() => onCategoryChange('ver-todos')}
+        className="relative h-9 flex items-center shrink-0 cursor-pointer"
+      >
+        <span
+          className={cn(
+            'font-body text-sm leading-tight uppercase tracking-wider transition-colors',
+            activeCategory === 'ver-todos'
+              ? 'text-foreground-primary font-bold'
+              : 'text-foreground-secondary font-light hover:text-foreground-primary'
+          )}
+        >
+          Ver Todos
+        </span>
+        {activeCategory === 'ver-todos' && (
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60px] h-[3px] bg-primary rounded-full" />
+        )}
+      </button>
     </nav>
   )
 }
