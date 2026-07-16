@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { Menu, Search, User, Heart, ShoppingCart, X, ArrowLeft, Clock, Trash2 } from 'lucide-react'
-import { products } from '../data/products'
+import { useProducts } from '../context/ProductsContext'
 import { useCart } from '../context/CartContext'
 
 interface TopBarProps {
@@ -26,6 +26,7 @@ function saveHistory(history: string[]) {
 export default function TopBar({ onMenuClick }: TopBarProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const { totalItems, setCartOpen } = useCart()
+  const { products } = useProducts()
   const [query, setQuery] = useState('')
   const [searchHistory, setSearchHistory] = useState<string[]>(loadHistory)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -43,7 +44,7 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
     return products
       .filter((p) => p.name.toLowerCase().includes(q))
       .slice(0, 3)
-  }, [query])
+  }, [query, products])
 
   function addToHistory(term: string) {
     const trimmed = term.trim()
