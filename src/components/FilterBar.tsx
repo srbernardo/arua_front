@@ -7,6 +7,7 @@ interface FilterBarProps {
   sortBy: string
   onSortChange: (value: string) => void
   activeFilters: number
+  heading: string
 }
 
 const sortOptions = [
@@ -17,10 +18,13 @@ const sortOptions = [
   { value: 'name-desc', label: 'Nome: Z-A' },
 ]
 
-export default function FilterBar({ open, onToggle, sortBy, onSortChange, activeFilters }: FilterBarProps) {
+export default function FilterBar({ open, onToggle, sortBy, onSortChange, activeFilters, heading }: FilterBarProps) {
   return (
     <div className="w-full bg-card">
-      <div className="flex items-center justify-end h-15 px-4 md:px-6">
+      <div className="flex items-center justify-between h-15 px-4 md:px-6">
+        <h1 key={heading} className="font-heading text-[28px] font-semibold text-foreground-primary leading-tight animate-fade-in">
+          {heading}
+        </h1>
         <button
           onClick={onToggle}
           className="flex items-center gap-2 h-11 bg-surface rounded-full px-6 cursor-pointer hover:bg-surface/80 transition-colors relative"
