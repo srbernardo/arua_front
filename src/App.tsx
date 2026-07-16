@@ -115,7 +115,7 @@ export default function App() {
             onSortChange={handleSortChange}
             activeFilters={sortBy !== 'default' ? 1 : 0}
           />
-          <main className="flex flex-col px-4 md:px-6 py-6">
+          <main className="flex flex-col px-4 md:px-6 py-6 pb-16 md:pb-20">
             <h1 key={heading} className="font-heading text-[28px] font-semibold text-foreground-primary leading-tight pb-3 animate-fade-in">
               {heading}
             </h1>
@@ -134,8 +134,8 @@ export default function App() {
               </>
             )}
           </main>
-          <Footer />
         </div>
+        <Footer />
       </div>
     </>
   )
