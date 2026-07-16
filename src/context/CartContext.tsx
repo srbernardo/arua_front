@@ -1,7 +1,9 @@
-import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from 'react'
 import type { Product } from '../types'
+import { api } from '../lib/api'
 
 export interface CartItem {
+  id: number
   product: Product
   quantity: number
 }
@@ -24,36 +26,71 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [cartOpen, setCartOpen] = useState(false)
 
-  const addItem = useCallback((product: Product) => {
-    setItems((prev) => {
-      const existing = prev.find((i) => i.product.id === product.id)
-      if (existing) {
-        return prev.map((i) =>
-          i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
-        )
+  useEffect(() => {
+    const token = localStorage.getItem('arua-cart-token')
+    if (!token) return
+    api.cart.show()
+      .then((data) => {
+        setItems(data.items.map(mapCartItem))
+      })
+      .catch(() => {})
+  }, [])
+
+  const addItem = useCallback(async (product: Product) => {
+    try {
+      const data = await api.cart.addItem(product.id, 1)
+      setItems(data.items.map(mapCartItem))
+    } catch {
+      setItems((prev) => {
+        const existing = prev.find((i) => i.product.id === product.id)
+        if (existing) {
+          return prev.map((i) =>
+            i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
+          )
+        }
+        return [...prev, { id: Date.now(), product, quantity: 1 }]
+      })
+    }
+  }, [])
+
+  const removeItem = useCallback(async (productId: number) => {
+    const item = items.find((i) => i.product.id === productId)
+    if (item) {
+      try {
+        const data = await api.cart.removeItem(item.id)
+        setItems(data.items.map(mapCartItem))
+      } catch {
+        setItems((prev) => prev.filter((i) => i.product.id !== productId))
       }
-      return [...prev, { product, quantity: 1 }]
-    })
-  }, [])
+    }
+  }, [items])
 
-  const removeItem = useCallback((productId: number) => {
-    setItems((prev) => prev.filter((i) => i.product.id !== productId))
-  }, [])
-
-  const updateQuantity = useCallback((productId: number, quantity: number) => {
+  const updateQuantity = useCallback(async (productId: number, quantity: number) => {
+    const item = items.find((i) => i.product.id === productId)
+    if (!item) return
     if (quantity <= 0) {
       removeItem(productId)
       return
     }
-    setItems((prev) =>
-      prev.map((i) =>
-        i.product.id === productId ? { ...i, quantity } : i
+    try {
+      const data = await api.cart.updateItem(item.id, quantity)
+      setItems(data.items.map(mapCartItem))
+    } catch {
+      setItems((prev) =>
+        prev.map((i) =>
+          i.product.id === productId ? { ...i, quantity } : i
+        )
       )
-    )
-  }, [removeItem])
+    }
+  }, [items, removeItem])
 
-  const clearCart = useCallback(() => {
-    setItems([])
+  const clearCart = useCallback(async () => {
+    try {
+      const data = await api.cart.clear()
+      setItems(data.items.map(mapCartItem))
+    } catch {
+      setItems([])
+    }
   }, [])
 
   const totalItems = useMemo(
@@ -79,4 +116,12 @@ export function useCart() {
   const ctx = useContext(CartContext)
   if (!ctx) throw new Error('useCart must be used within CartProvider')
   return ctx
+}
+
+function mapCartItem(item: any): CartItem {
+  return {
+    id: item.id,
+    product: item.product,
+    quantity: item.quantity,
+  }
 }
