@@ -33,7 +33,7 @@ export default function ProductGrid({ activeCategory, sortBy }: ProductGridProps
     }
 
     return result
-  }, [products, sortBy])
+  }, [products, activeCategory, sortBy])
 
   if (loading) {
     return (
