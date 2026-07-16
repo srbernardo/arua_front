@@ -95,19 +95,19 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick }: TopBarPro
             }}
             className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
           >
-            <Search size={20} className="text-foreground-secondary" />
+            <Search size={24} className="text-foreground-secondary" />
           </button>
           <button className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity">
-            <User size={20} className="text-foreground-secondary" />
+            <User size={24} className="text-foreground-secondary" />
           </button>
           <button className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity">
-            <Heart size={20} className="text-foreground-secondary" />
+            <Heart size={24} className="text-foreground-secondary" />
           </button>
           <button
             onClick={() => setCartOpen(true)}
             className="w-12 h-11 flex items-center justify-center relative cursor-pointer hover:opacity-70 transition-opacity"
           >
-            <ShoppingCart size={20} className="text-foreground-secondary" />
+            <ShoppingCart size={24} className="text-foreground-secondary" />
             {totalItems > 0 && (
               <span className="absolute top-1 right-1 w-[18px] h-[18px] bg-destructive text-white text-[10px] font-semibold rounded-full flex items-center justify-center">
                 {totalItems > 99 ? '99+' : totalItems}
