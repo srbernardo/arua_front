@@ -4,6 +4,7 @@ export interface Product {
   price: number
   images: string[]
   colors: string[]
+  category_id?: string
 }
 
 export interface Category {
