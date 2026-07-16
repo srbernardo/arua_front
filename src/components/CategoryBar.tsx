@@ -1,16 +1,13 @@
 import { cn } from '../lib/utils'
-import { useProducts } from '../context/ProductsContext'
+import type { Category } from '../types'
 
 interface CategoryBarProps {
+  categories: Category[]
   activeCategory: string
   onCategoryChange: (id: string) => void
 }
 
-export default function CategoryBar({ activeCategory, onCategoryChange }: CategoryBarProps) {
-  const { categories, loading } = useProducts()
-
-  if (loading) return null
-
+export default function CategoryBar({ categories, activeCategory, onCategoryChange }: CategoryBarProps) {
   return (
     <nav className="w-full h-14 flex items-center gap-4 px-4 md:px-10 py-2 overflow-x-auto scrollbar-hide">
       <button
