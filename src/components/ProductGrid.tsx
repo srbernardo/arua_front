@@ -5,16 +5,22 @@ import { useProducts } from '../context/ProductsContext'
 interface ProductGridProps {
   activeCategory: string
   sortBy: string
+  searchQuery: string
 }
 
-export default function ProductGrid({ activeCategory, sortBy }: ProductGridProps) {
+export default function ProductGrid({ activeCategory, sortBy, searchQuery }: ProductGridProps) {
   const { products, loading, error } = useProducts()
 
   const filtered = useMemo(() => {
     let result = [...products]
 
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter((p) => p.name.toLowerCase().includes(q))
+    }
+
     if (activeCategory !== 'ver-todos') {
-      result = products.filter((p) => p.category_id === activeCategory)
+      result = result.filter((p) => p.category_id === activeCategory)
     }
 
     switch (sortBy) {
@@ -33,7 +39,7 @@ export default function ProductGrid({ activeCategory, sortBy }: ProductGridProps
     }
 
     return result
-  }, [products, activeCategory, sortBy])
+  }, [products, activeCategory, sortBy, searchQuery])
 
   if (loading) {
     return (
