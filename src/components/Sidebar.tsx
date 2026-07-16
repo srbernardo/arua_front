@@ -3,6 +3,7 @@ import { X, Home, Mail, ShoppingBag, LifeBuoy } from 'lucide-react'
 interface SidebarProps {
   open: boolean
   onClose: () => void
+  onHome: () => void
 }
 
 const menuItems = [
@@ -55,7 +56,7 @@ const socialLinks = [
   { label: 'Pinterest', icon: PinterestIcon },
 ]
 
-export default function Sidebar({ open, onClose }: SidebarProps) {
+export default function Sidebar({ open, onClose, onHome }: SidebarProps) {
   return (
     <>
       {open && (
@@ -81,7 +82,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           {menuItems.map((item) => (
             <button
               key={item.label}
-              onClick={onClose}
+              onClick={() => {
+                onClose()
+                if (item.label === 'Home' || item.label === 'Ver Produtos') onHome()
+              }}
               className="w-full flex items-center gap-3 text-left px-4 py-3 rounded-lg font-body text-sm text-foreground-secondary hover:bg-surface hover:text-foreground-primary transition-colors cursor-pointer"
             >
               <item.icon size={20} className="shrink-0" />

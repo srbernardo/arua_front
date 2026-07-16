@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext'
 interface TopBarProps {
   onMenuClick: () => void
   onSearch: (query: string) => void
+  onLogoClick: () => void
 }
 
 const HISTORY_KEY = 'arua-search-history'
@@ -24,7 +25,7 @@ function saveHistory(history: string[]) {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
 }
 
-export default function TopBar({ onMenuClick, onSearch }: TopBarProps) {
+export default function TopBar({ onMenuClick, onSearch, onLogoClick }: TopBarProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const { totalItems, setCartOpen } = useCart()
   const { products } = useProducts()
@@ -80,11 +81,11 @@ export default function TopBar({ onMenuClick, onSearch }: TopBarProps) {
           </div>
         </button>
 
-        <div className="flex items-center justify-center h-12">
+        <button onClick={onLogoClick} className="flex items-center justify-center h-12 cursor-pointer">
           <span className="text-primary font-heading text-xl md:text-[28px] font-semibold leading-tight">
             Bikini Store
           </span>
-        </div>
+        </button>
 
         <div className="flex items-center h-12 gap-0 md:gap-1">
           <button
