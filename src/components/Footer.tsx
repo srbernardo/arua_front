@@ -1,5 +1,3 @@
-import { Music } from 'lucide-react'
-
 const linkGroups = [
   {
     title: 'Atendimento',
@@ -19,11 +17,46 @@ const linkGroups = [
   },
 ]
 
+function InstagramIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <circle cx="12" cy="12" r="5" />
+      <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+function TwitterIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 4l11.733 16h4.267l-11.733 -16z" />
+      <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" />
+    </svg>
+  )
+}
+
+function FacebookIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  )
+}
+
+function TikTokIcon({ size }: { size: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 12a4 4 0 1 0 4 4V4h5a5 5 0 0 1-5 5" />
+    </svg>
+  )
+}
+
 const socialIcons = [
-  { icon: Music, label: 'Instagram' },
-  { icon: Music, label: 'Twitter' },
-  { icon: Music, label: 'Facebook' },
-  { icon: Music, label: 'TikTok' },
+  { icon: InstagramIcon, label: 'Instagram' },
+  { icon: TwitterIcon, label: 'Twitter' },
+  { icon: FacebookIcon, label: 'Facebook' },
+  { icon: TikTokIcon, label: 'TikTok' },
 ]
 
 export default function Footer() {
@@ -43,9 +76,9 @@ export default function Footer() {
           <span className="font-heading text-sm font-semibold text-white leading-tight">
             Siga-nos
           </span>
-          <div className="flex items-center h-11 gap-0">
+          <div className="flex items-center gap-2 mt-1">
             {socialIcons.map(({ icon: Icon, label }) => (
-              <button key={label} className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity">
+              <button key={label} className="w-10 h-10 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity bg-white/10 rounded-full">
                 <Icon size={20} className="text-white" />
               </button>
             ))}
