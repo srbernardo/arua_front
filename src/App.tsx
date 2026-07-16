@@ -7,17 +7,18 @@ import LoadMoreButton from './components/LoadMoreButton'
 import Footer from './components/Footer'
 import Sidebar from './components/Sidebar'
 import CartDrawer from './components/CartDrawer'
-import { categories } from './data/products'
+import { useProducts } from './context/ProductsContext'
 
 export default function App() {
+  const { categories, loading } = useProducts()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
   const [sortBy, setSortBy] = useState('default')
-  const [activeCategory, setActiveCategory] = useState('top-bikini')
+  const [activeCategory, setActiveCategory] = useState('ver-todos')
 
   const categoryName = useMemo(
-    () => categories.find((c) => c.id === activeCategory)?.name ?? 'Top Bikini',
-    [activeCategory]
+    () => categories.find((c) => c.id === activeCategory)?.name ?? 'Ver Todos',
+    [activeCategory, categories]
   )
 
   return (
@@ -45,7 +46,10 @@ export default function App() {
             <h1 key={categoryName} className="font-heading text-[28px] font-semibold text-foreground-primary leading-tight pb-3 animate-fade-in">
               {categoryName}
             </h1>
-            <ProductGrid />
+            <ProductGrid
+              activeCategory={activeCategory}
+              sortBy={sortBy}
+            />
             <LoadMoreButton />
           </main>
           <Footer />
