@@ -58,7 +58,7 @@ export default function App() {
   }, [products, activeCategory, sortBy, searchQuery, searchOnly])
 
   const categoryName = useMemo(
-    () => categories.find((c) => c.id === activeCategory)?.name ?? 'Ver Todos',
+    () => categories.find((c) => c.id === activeCategory)?.name ?? 'Biquínis e Fatos de Banho',
     [activeCategory, categories]
   )
 
@@ -102,7 +102,7 @@ export default function App() {
       <CartDrawer />
       <div className="w-full bg-card min-h-screen flex flex-col">
         <TopBar onMenuClick={() => setSidebarOpen(true)} onSearch={handleSearch} onLogoClick={handleHome} />
-        <div className="w-full max-w-[1440px] mx-auto flex flex-col flex-1">
+        <div className="w-full flex flex-col flex-1">
           <CategoryBar
             categories={visibleCategories}
             activeCategory={activeCategory}
@@ -114,11 +114,9 @@ export default function App() {
             sortBy={sortBy}
             onSortChange={handleSortChange}
             activeFilters={sortBy !== 'default' ? 1 : 0}
+            heading={heading}
           />
           <main className="flex flex-col px-4 md:px-6 py-6 pb-16 md:pb-20">
-            <h1 key={heading} className="font-heading text-[28px] font-semibold text-foreground-primary leading-tight pb-3 animate-fade-in">
-              {heading}
-            </h1>
             {loading ? (
               <div className="flex items-center justify-center py-20">
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
