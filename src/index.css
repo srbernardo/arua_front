@@ -1,14 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,200..1000;1,200..1000&display=swap');
 @import "tailwindcss";
-
-body {
-  margin: 0;
-  padding: 0;
-}
-
-#root {
-  width: 100%;
-}
 
 @theme {
   --color-primary: #D4916E;
@@ -24,9 +15,32 @@ body {
   --color-destructive: #C45A4A;
   --color-card: #FFFFFF;
   --color-border: #D4C8B8;
-  --font-heading: 'Inter', sans-serif;
-  --font-body: 'Geist', sans-serif;
+  --font-heading: 'Nunito Sans', sans-serif;
+  --font-body: 'Nunito Sans', sans-serif;
+  --font-weight-heading: 300;
   --animate-fade-in: fade-in 0.3s ease-out;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  touch-action: manipulation;
+}
+
+*, *::before, *::after {
+  word-wrap: break-word;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-feature-settings: "kern";
+  overscroll-behavior: none;
+}
+
+#root {
+  width: 100%;
 }
 
 @utility scrollbar-hide {
