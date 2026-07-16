@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext'
 
 interface TopBarProps {
   onMenuClick: () => void
+  onSearch: (query: string) => void
 }
 
 const HISTORY_KEY = 'arua-search-history'
@@ -23,7 +24,7 @@ function saveHistory(history: string[]) {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
 }
 
-export default function TopBar({ onMenuClick }: TopBarProps) {
+export default function TopBar({ onMenuClick, onSearch }: TopBarProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const { totalItems, setCartOpen } = useCart()
   const { products } = useProducts()
@@ -64,6 +65,7 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
     addToHistory(term)
     setSearchOpen(false)
     setQuery('')
+    onSearch(term)
   }
 
   return (
@@ -86,7 +88,10 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
 
         <div className="flex items-center h-12 gap-0 md:gap-1">
           <button
-            onClick={() => setSearchOpen(!searchOpen)}
+            onClick={() => {
+              if (searchOpen) onSearch('')
+              setSearchOpen(!searchOpen)
+            }}
             className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
           >
             <Search size={20} className="text-foreground-secondary" />
@@ -114,7 +119,7 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
       {searchOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-40 transition-opacity"
-          onClick={() => setSearchOpen(false)}
+          onClick={() => { setSearchOpen(false); onSearch('') }}
         />
       )}
 
@@ -125,7 +130,7 @@ export default function TopBar({ onMenuClick }: TopBarProps) {
       >
         <div className="flex items-center h-16 md:h-20 px-4 md:px-6 border-b border-border">
           <button
-            onClick={() => setSearchOpen(false)}
+            onClick={() => { setSearchOpen(false); onSearch('') }}
             className="flex items-center justify-center w-11 h-11 cursor-pointer hover:opacity-70 transition-opacity shrink-0"
           >
             <ArrowLeft size={20} className="text-foreground-secondary" />
