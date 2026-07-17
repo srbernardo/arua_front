@@ -1,8 +1,39 @@
-import { X, Minus, Plus, Trash2, ShoppingCart } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { X, Minus, Plus, Trash2, ShoppingCart, Check } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 
 export default function CartDrawer() {
-  const { items, cartOpen, setCartOpen, removeItem, updateQuantity, totalItems, totalPrice } = useCart()
+  const { items, cartOpen, setCartOpen, removeItem, updateQuantity } = useCart()
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+
+  const allSelected = items.length > 0 && items.every((i) => selectedIds.has(i.id))
+
+  function toggleSelect(id: number) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleSelectAll() {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(items.map((i) => i.id)))
+    }
+  }
+
+  const selectedTotal = useMemo(
+    () => items.filter((i) => selectedIds.has(i.id)).reduce((sum, i) => sum + i.product.price * i.quantity, 0),
+    [items, selectedIds]
+  )
+
+  const selectedCount = useMemo(
+    () => items.filter((i) => selectedIds.has(i.id)).reduce((sum, i) => sum + i.quantity, 0),
+    [items, selectedIds]
+  )
 
   return (
     <>
@@ -20,11 +51,24 @@ export default function CartDrawer() {
       >
         <div className="flex items-center justify-between p-6 border-b border-border">
           <span className="font-heading text-lg font-semibold text-foreground-primary">
-            Carrinho ({totalItems})
+            Carrinho ({items.reduce((sum, i) => sum + i.quantity, 0)})
           </span>
-          <button onClick={() => setCartOpen(false)} className="cursor-pointer hover:opacity-70 transition-opacity">
-            <X size={20} className="text-foreground-secondary" />
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleSelectAll}
+              className="flex items-center gap-1.5 text-xs font-body text-foreground-secondary cursor-pointer hover:text-foreground-primary transition-colors"
+            >
+              <span className={`w-4 h-4 rounded-sm border flex items-center justify-center transition-colors ${
+                allSelected ? 'bg-foreground-primary border-foreground-primary' : 'border-foreground-secondary/40'
+              }`}>
+                {allSelected && <Check size={12} className="text-white" />}
+              </span>
+              {allSelected ? 'Desmarcar tudo' : 'Selecionar tudo'}
+            </button>
+            <button onClick={() => setCartOpen(false)} className="cursor-pointer hover:opacity-70 transition-opacity">
+              <X size={20} className="text-foreground-secondary" />
+            </button>
+          </div>
         </div>
 
         {items.length === 0 ? (
@@ -39,6 +83,16 @@ export default function CartDrawer() {
             <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4">
               {items.map((item) => (
                 <div key={item.id} className="flex gap-4 pb-4 border-b border-border last:border-0">
+                  <div className="flex flex-col items-center gap-2 pt-1">
+                    <button
+                      onClick={() => toggleSelect(item.id)}
+                      className={`w-4 h-4 rounded-sm border flex items-center justify-center transition-colors cursor-pointer ${
+                        selectedIds.has(item.id) ? 'bg-foreground-primary border-foreground-primary' : 'border-foreground-secondary/40'
+                      }`}
+                    >
+                      {selectedIds.has(item.id) && <Check size={12} className="text-white" />}
+                    </button>
+                  </div>
                   <div className="w-20 h-24 shrink-0 rounded-lg overflow-hidden bg-surface">
                     <img
                       src={item.product.images_by_color[0]?.images[0]?.url ?? ''}
@@ -94,13 +148,18 @@ export default function CartDrawer() {
 
             <div className="border-t border-border p-4 md:p-6 flex flex-col gap-4">
               <div className="flex justify-between items-center">
-                <span className="font-body text-sm text-foreground-secondary">Subtotal</span>
+                <span className="font-body text-sm text-foreground-secondary">
+                  Subtotal{selectedCount > 0 && ` (${selectedCount} ${selectedCount === 1 ? 'item' : 'itens'})`}
+                </span>
                 <span className="font-heading text-lg font-bold text-foreground-primary">
-                  ${totalPrice.toFixed(2)}
+                  ${(selectedCount > 0 ? selectedTotal : items.reduce((sum, i) => sum + i.product.price * i.quantity, 0)).toFixed(2)}
                 </span>
               </div>
-              <button className="w-full h-12 bg-primary text-white font-body text-sm font-semibold rounded-full cursor-pointer hover:bg-primary/90 transition-colors">
-                Finalizar Pedido
+              <button
+                disabled={selectedCount === 0}
+                className="w-full h-12 bg-primary text-white font-body text-sm font-semibold rounded-full cursor-pointer hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {selectedCount > 0 ? `Finalizar Pedido (${selectedCount})` : 'Selecione itens para continuar'}
               </button>
             </div>
           </>
