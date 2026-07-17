@@ -25,6 +25,13 @@ export default function CartDrawer() {
     }
   }
 
+  function removeSelected() {
+    for (const id of selectedIds) {
+      removeItem(id)
+    }
+    setSelectedIds(new Set())
+  }
+
   const selectedTotal = useMemo(
     () => items.filter((i) => selectedIds.has(i.id)).reduce((sum, i) => sum + i.product.price * i.quantity, 0),
     [items, selectedIds]
@@ -54,6 +61,15 @@ export default function CartDrawer() {
             Carrinho ({items.reduce((sum, i) => sum + i.quantity, 0)})
           </span>
           <div className="flex items-center gap-3">
+            {selectedIds.size > 0 && (
+              <button
+                onClick={removeSelected}
+                className="flex items-center gap-1 text-xs font-body text-destructive cursor-pointer hover:text-destructive/80 transition-colors"
+              >
+                <Trash2 size={13} />
+                Remover selecionados
+              </button>
+            )}
             <button
               onClick={toggleSelectAll}
               className="flex items-center gap-1.5 text-xs font-body text-foreground-secondary cursor-pointer hover:text-foreground-primary transition-colors"
