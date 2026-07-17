@@ -60,31 +60,32 @@ export default function CartDrawer() {
           <span className="font-heading text-lg font-semibold text-foreground-primary">
             Carrinho ({items.reduce((sum, i) => sum + i.quantity, 0)})
           </span>
-          <div className="flex items-center gap-3">
-            {selectedIds.size > 0 && (
-              <button
-                onClick={removeSelected}
-                className="flex items-center gap-1 text-xs font-body text-destructive cursor-pointer hover:text-destructive/80 transition-colors"
-              >
-                <Trash2 size={13} />
-                Remover selecionados
-              </button>
-            )}
+          <button onClick={() => setCartOpen(false)} className="cursor-pointer hover:opacity-70 transition-opacity">
+            <X size={20} className="text-foreground-secondary" />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2 px-6 py-3 border-b border-border">
+          <button
+            onClick={toggleSelectAll}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-body font-medium transition-all cursor-pointer ${
+              allSelected
+                ? 'bg-foreground-primary text-white'
+                : 'bg-white text-foreground-primary border border-border hover:bg-neutral-50'
+            }`}
+          >
+            {allSelected && <Check size={13} className="text-white" />}
+            {allSelected ? 'Desmarcar' : 'Selecionar tudo'}
+          </button>
+          {selectedIds.size > 0 && (
             <button
-              onClick={toggleSelectAll}
-              className="flex items-center gap-1.5 text-xs font-body text-foreground-secondary cursor-pointer hover:text-foreground-primary transition-colors"
+              onClick={removeSelected}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-body font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-all cursor-pointer"
             >
-              <span className={`w-4 h-4 rounded-sm border flex items-center justify-center transition-colors ${
-                allSelected ? 'bg-foreground-primary border-foreground-primary' : 'border-foreground-secondary/40'
-              }`}>
-                {allSelected && <Check size={12} className="text-white" />}
-              </span>
-              {allSelected ? 'Desmarcar tudo' : 'Selecionar tudo'}
+              <Trash2 size={13} />
+              Remover ({selectedIds.size})
             </button>
-            <button onClick={() => setCartOpen(false)} className="cursor-pointer hover:opacity-70 transition-opacity">
-              <X size={20} className="text-foreground-secondary" />
-            </button>
-          </div>
+          )}
         </div>
 
         {items.length === 0 ? (
@@ -173,7 +174,7 @@ export default function CartDrawer() {
               </div>
               <button
                 disabled={selectedCount === 0}
-                className="w-full h-12 bg-primary text-white font-body text-sm font-semibold rounded-full cursor-pointer hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full h-12 bg-black text-white font-body text-sm font-semibold rounded-full cursor-pointer hover:bg-black/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {selectedCount > 0 ? `Finalizar Pedido (${selectedCount})` : 'Selecione itens para continuar'}
               </button>
