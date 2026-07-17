@@ -27,7 +27,7 @@ export default function CategoryBar({ categories, activeCategory, onCategoryChan
             {cat.name}
           </span>
           {cat.id === activeCategory && (
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60px] h-[3px] bg-primary rounded-full" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60px] h-[3px] bg-black rounded-full" />
           )}
         </button>
       ))}
@@ -47,7 +47,7 @@ export default function CategoryBar({ categories, activeCategory, onCategoryChan
           Ver Todos
         </span>
         {activeCategory === 'ver-todos' && (
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60px] h-[3px] bg-primary rounded-full" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60px] h-[3px] bg-black rounded-full" />
         )}
       </button>
     </nav>
