@@ -71,7 +71,7 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick }: TopBarPro
 
   return (
     <>
-      <header className="w-full h-16 md:h-20 shrink-0 flex flex-row justify-between items-center bg-card border-b-2 border-primary px-4 md:px-6">
+      <header className="fixed top-0 left-0 right-0 z-30 w-full h-16 md:h-20 flex flex-row justify-between items-center bg-card border-b-2 border-neutral-400 px-4 md:px-6">
         <button
           onClick={onMenuClick}
           className="flex items-center justify-center h-12 px-2 md:px-6 cursor-pointer hover:opacity-80 transition-opacity"

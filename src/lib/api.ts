@@ -38,8 +38,8 @@ export const api = {
   },
   cart: {
     show: () => fetchAPI('/cart'),
-    addItem: (productId: number, quantity = 1) =>
-      fetchAPI('/cart/add_item', { method: 'POST', body: JSON.stringify({ product_id: productId, quantity }) }),
+    addItem: (variantId: number, quantity = 1) =>
+      fetchAPI('/cart/add_item', { method: 'POST', body: JSON.stringify({ variant_id: variantId, quantity }) }),
     updateItem: (id: number, quantity: number) =>
       fetchAPI(`/cart/items/${id}`, { method: 'PATCH', body: JSON.stringify({ quantity }) }),
     removeItem: (id: number) =>

@@ -1,18 +1,23 @@
 import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from 'react'
-import type { Product } from '../types'
+import type { Product, Variant } from '../types'
 import { api } from '../lib/api'
 
 export interface CartItem {
   id: number
   product: Product
+  variant: {
+    size: string
+    color: string
+    sku: string
+  }
   quantity: number
 }
 
 interface CartContextType {
   items: CartItem[]
-  addItem: (product: Product) => void
-  removeItem: (productId: number) => void
-  updateQuantity: (productId: number, quantity: number) => void
+  addItem: (product: Product, variant: Variant) => void
+  removeItem: (cartItemId: number) => void
+  updateQuantity: (cartItemId: number, quantity: number) => void
   clearCart: () => void
   totalItems: number
   totalPrice: number
@@ -36,49 +41,48 @@ export function CartProvider({ children }: { children: ReactNode }) {
       .catch(() => {})
   }, [])
 
-  const addItem = useCallback(async (product: Product) => {
+  const addItem = useCallback(async (product: Product, variant: Variant) => {
     try {
-      const data = await api.cart.addItem(product.id, 1)
+      const data = await api.cart.addItem(variant.id, 1)
       setItems(data.items.map(mapCartItem))
     } catch {
       setItems((prev) => {
-        const existing = prev.find((i) => i.product.id === product.id)
+        const existing = prev.find(
+          (i) => i.product.id === product.id && i.variant.size === variant.size && i.variant.color === variant.color
+        )
         if (existing) {
           return prev.map((i) =>
-            i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
+            i.product.id === product.id && i.variant.size === variant.size && i.variant.color === variant.color
+              ? { ...i, quantity: i.quantity + 1 }
+              : i
           )
         }
-        return [...prev, { id: Date.now(), product, quantity: 1 }]
+        return [...prev, { id: Date.now(), product, variant: { size: variant.size, color: variant.color, sku: variant.sku }, quantity: 1 }]
       })
     }
   }, [])
 
-  const removeItem = useCallback(async (productId: number) => {
-    const item = items.find((i) => i.product.id === productId)
-    if (item) {
-      try {
-        const data = await api.cart.removeItem(item.id)
-        setItems(data.items.map(mapCartItem))
-      } catch {
-        setItems((prev) => prev.filter((i) => i.product.id !== productId))
-      }
+  const removeItem = useCallback(async (cartItemId: number) => {
+    try {
+      const data = await api.cart.removeItem(cartItemId)
+      setItems(data.items.map(mapCartItem))
+    } catch {
+      setItems((prev) => prev.filter((i) => i.id !== cartItemId))
     }
-  }, [items])
+  }, [])
 
-  const updateQuantity = useCallback(async (productId: number, quantity: number) => {
-    const item = items.find((i) => i.product.id === productId)
-    if (!item) return
+  const updateQuantity = useCallback(async (cartItemId: number, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(productId)
+      removeItem(cartItemId)
       return
     }
     try {
-      const data = await api.cart.updateItem(item.id, quantity)
+      const data = await api.cart.updateItem(cartItemId, quantity)
       setItems(data.items.map(mapCartItem))
     } catch {
       setItems((prev) =>
         prev.map((i) =>
-          i.product.id === productId ? { ...i, quantity } : i
+          i.id === cartItemId ? { ...i, quantity } : i
         )
       )
     }
@@ -122,6 +126,7 @@ function mapCartItem(item: any): CartItem {
   return {
     id: item.id,
     product: item.product,
+    variant: item.variant,
     quantity: item.quantity,
   }
 }

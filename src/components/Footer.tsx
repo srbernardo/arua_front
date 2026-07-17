@@ -78,8 +78,8 @@ export default function Footer() {
           </span>
           <div className="flex items-center gap-2 mt-1">
             {socialIcons.map(({ icon: Icon, label }) => (
-              <button key={label} className="w-10 h-10 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity bg-white/10 rounded-full">
-                <Icon size={20} className="text-white" />
+              <button key={label} className="w-10 h-10 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity bg-white/10 rounded-full text-white">
+                <Icon size={20} />
               </button>
             ))}
           </div>

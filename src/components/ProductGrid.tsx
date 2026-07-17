@@ -3,9 +3,10 @@ import type { Product } from "../types";
 
 interface ProductGridProps {
   products: Product[];
+  defaultColor?: string;
 }
 
-export default function ProductGrid({ products }: ProductGridProps) {
+export default function ProductGrid({ products, defaultColor }: ProductGridProps) {
   if (products.length === 0) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -19,7 +20,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 w-full">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCard key={product.id} product={product} defaultColor={defaultColor} />
       ))}
     </div>
   );

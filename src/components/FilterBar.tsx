@@ -8,6 +8,13 @@ interface FilterBarProps {
   onSortChange: (value: string) => void
   activeFilters: number
   heading: string
+  colors: string[]
+  activeColor: string
+  onColorChange: (color: string) => void
+  sizes: string[]
+  activeSize: string[]
+  onSizeChange: (size: string) => void
+  onClearFilters: () => void
 }
 
 const sortOptions = [
@@ -18,7 +25,7 @@ const sortOptions = [
   { value: 'name-desc', label: 'Nome: Z-A' },
 ]
 
-export default function FilterBar({ open, onToggle, sortBy, onSortChange, activeFilters, heading }: FilterBarProps) {
+export default function FilterBar({ open, onToggle, sortBy, onSortChange, activeFilters, heading, colors, activeColor, onColorChange, sizes, activeSize, onSizeChange, onClearFilters }: FilterBarProps) {
   return (
     <div className="w-full bg-card">
       <div className="flex items-center justify-between h-15 px-4 md:px-6">
@@ -27,7 +34,7 @@ export default function FilterBar({ open, onToggle, sortBy, onSortChange, active
         </h1>
         <button
           onClick={onToggle}
-          className="flex items-center gap-2 h-11 bg-surface rounded-full px-6 cursor-pointer hover:bg-surface/80 transition-colors relative"
+          className="flex items-center gap-2 h-11 rounded-full px-6 cursor-pointer hover:opacity-70 transition-opacity relative"
         >
           <SlidersHorizontal size={20} className="text-foreground-secondary" />
           <span className="font-body text-sm font-medium text-foreground-secondary">
@@ -60,7 +67,49 @@ export default function FilterBar({ open, onToggle, sortBy, onSortChange, active
           </button>
         </div>
 
-        <div className="flex flex-col p-4 gap-1">
+        {colors.length > 0 && (
+          <div className="flex flex-col px-4 pt-4 pb-2">
+            <span className="font-body text-xs font-semibold text-foreground-secondary/60 uppercase tracking-wider mb-2">
+              Cor
+            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              {colors.map((color) => (
+                <button
+                  key={color}
+                  onClick={() => onColorChange(color)}
+                  className={`w-7 h-7 rounded-full cursor-pointer hover:scale-110 transition-transform ${
+                    color === activeColor ? 'ring-2 ring-foreground-primary ring-offset-2' : ''
+                  }`}
+                  style={{ backgroundColor: color }}
+                  title={color}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        {sizes.length > 0 && (
+          <div className="flex flex-col px-4 pt-4 pb-2 border-t border-border">
+            <span className="font-body text-xs font-semibold text-foreground-secondary/60 uppercase tracking-wider mb-2">
+              Tamanho
+            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              {sizes.map((size) => (
+                <button
+                  key={size}
+                  onClick={() => onSizeChange(size)}
+                  className={`px-3 py-1 rounded-full text-sm font-body cursor-pointer hover:scale-105 transition-transform text-black ${
+                    activeSize.includes(size)
+                      ? 'bg-neutral-400'
+                      : 'bg-neutral-100'
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="flex flex-col px-4 pb-4 pt-2 gap-1 border-t border-border">
           {sortOptions.map((option) => (
             <button
               key={option.value}
@@ -76,6 +125,16 @@ export default function FilterBar({ open, onToggle, sortBy, onSortChange, active
             </button>
           ))}
         </div>
+        {activeFilters > 0 && (
+          <div className="px-4 pb-4">
+            <button
+              onClick={() => { onClearFilters(); onToggle(); }}
+              className="w-full text-center px-4 py-3 rounded-lg font-body text-sm font-semibold text-destructive hover:bg-destructive/5 transition-colors cursor-pointer"
+            >
+              Remover filtros
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
