@@ -18,7 +18,22 @@ export default function App() {
   const [sortBy, setSortBy] = useState('default')
   const [activeCategory, setActiveCategory] = useState('ver-todos')
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeColor, setActiveColor] = useState('')
+  const [activeSize, setActiveSize] = useState<string[]>([])
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  const allColors = useMemo(() => {
+    const set = new Set<string>()
+    products.forEach((p) => p.colors.forEach((c) => set.add(c)))
+    return Array.from(set)
+  }, [products])
+
+  const allSizes = useMemo(() => {
+    const order = ["XS", "S", "M", "L", "XL", "Tamanho Único"]
+    const set = new Set<string>()
+    products.forEach((p) => p.sizes?.forEach((s) => set.add(s)))
+    return Array.from(set).sort((a, b) => order.indexOf(a) - order.indexOf(b))
+  }, [products])
 
   const searchOnly = useMemo(() => {
     if (!searchQuery) return null
@@ -39,6 +54,14 @@ export default function App() {
       result = result.filter((p) => p.category_id === activeCategory)
     }
 
+    if (activeColor) {
+      result = result.filter((p) => p.colors.includes(activeColor))
+    }
+
+    if (activeSize.length > 0) {
+      result = result.filter((p) => p.sizes && p.sizes.some((s) => activeSize.includes(s)))
+    }
+
     switch (sortBy) {
       case 'price-asc':
         result.sort((a, b) => a.price - b.price)
@@ -55,7 +78,7 @@ export default function App() {
     }
 
     return result
-  }, [products, activeCategory, sortBy, searchQuery, searchOnly])
+  }, [products, activeCategory, sortBy, searchQuery, searchOnly, activeColor, activeSize])
 
   const categoryName = useMemo(
     () => categories.find((c) => c.id === activeCategory)?.name ?? 'Biquínis e Fatos de Banho',
@@ -74,9 +97,30 @@ export default function App() {
     setVisibleCount(PAGE_SIZE)
   }
 
+  function handleColorChange(color: string) {
+    setActiveColor((prev) => (prev === color ? '' : color))
+    setVisibleCount(PAGE_SIZE)
+  }
+
+  function handleSizeChange(size: string) {
+    setActiveSize((prev) =>
+      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
+    )
+    setVisibleCount(PAGE_SIZE)
+  }
+
+  function handleClearFilters() {
+    setSortBy('default')
+    setActiveColor('')
+    setActiveSize([])
+    setVisibleCount(PAGE_SIZE)
+  }
+
   const handleHome = useCallback(() => {
     setActiveCategory('ver-todos')
     setSearchQuery('')
+    setActiveColor('')
+    setActiveSize([])
     setSortBy('default')
     setVisibleCount(PAGE_SIZE)
   }, [])
@@ -102,7 +146,7 @@ export default function App() {
       <CartDrawer />
       <div className="w-full bg-card min-h-screen flex flex-col">
         <TopBar onMenuClick={() => setSidebarOpen(true)} onSearch={handleSearch} onLogoClick={handleHome} />
-        <div className="w-full flex flex-col flex-1">
+        <div className="w-full flex flex-col flex-1 pt-16 md:pt-20">
           <CategoryBar
             categories={visibleCategories}
             activeCategory={activeCategory}
@@ -113,8 +157,15 @@ export default function App() {
             onToggle={() => setFilterOpen(!filterOpen)}
             sortBy={sortBy}
             onSortChange={handleSortChange}
-            activeFilters={sortBy !== 'default' ? 1 : 0}
+            activeFilters={(sortBy !== 'default' ? 1 : 0) + (activeColor ? 1 : 0) + (activeSize.length > 0 ? 1 : 0)}
             heading={heading}
+            colors={allColors}
+            activeColor={activeColor}
+            onColorChange={handleColorChange}
+            sizes={allSizes}
+            activeSize={activeSize}
+            onSizeChange={handleSizeChange}
+            onClearFilters={handleClearFilters}
           />
           <main className="flex flex-col px-4 md:px-6 py-6 pb-16 md:pb-20">
             {loading ? (
@@ -127,7 +178,7 @@ export default function App() {
               </div>
             ) : (
               <>
-                <ProductGrid products={filtered.slice(0, visibleCount)} />
+                <ProductGrid products={filtered.slice(0, visibleCount)} defaultColor={activeColor} />
                 {hasMore && <LoadMoreButton onLoadMore={handleLoadMore} />}
               </>
             )}
