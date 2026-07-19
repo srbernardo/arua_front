@@ -9,7 +9,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, defaultColor }: ProductCardProps) {
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? '')
+  const [selectedSize] = useState(product.sizes[0] ?? '')
   const [selectedColor, setSelectedColor] = useState('')
   const [imgIndex, setImgIndex] = useState(0)
   const [modalOpen, setModalOpen] = useState(false)
