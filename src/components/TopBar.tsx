@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { Menu, Search, User, Heart, ShoppingCart, X, ArrowLeft, Clock, Trash2 } from 'lucide-react'
+import { Menu, Search, User, Heart, ShoppingCart, X, ArrowLeft, Clock, Trash2, LogOut } from 'lucide-react'
 import { useProducts } from '../context/ProductsContext'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
+import AuthModal from './AuthModal'
 
 interface TopBarProps {
   onMenuClick: () => void
@@ -29,8 +31,10 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick }: TopBarPro
   const [searchOpen, setSearchOpen] = useState(false)
   const { totalItems, setCartOpen } = useCart()
   const { products } = useProducts()
+  const { user, logout } = useAuth()
   const [query, setQuery] = useState('')
   const [searchHistory, setSearchHistory] = useState<string[]>(loadHistory)
+  const [authOpen, setAuthOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -97,8 +101,11 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick }: TopBarPro
           >
             <Search size={24} className="text-foreground-secondary" />
           </button>
-          <button className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity">
-            <User size={24} className="text-foreground-secondary" />
+          <button
+            onClick={() => user ? logout() : setAuthOpen(true)}
+            className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
+          >
+            {user ? <LogOut size={24} className="text-foreground-secondary" /> : <User size={24} className="text-foreground-secondary" />}
           </button>
           <button className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity">
             <Heart size={24} className="text-foreground-secondary" />
@@ -234,6 +241,8 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick }: TopBarPro
           )}
         </div>
       </div>
+
+      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
     </>
   )
 }
