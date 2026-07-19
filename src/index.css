@@ -19,6 +19,7 @@
   --font-body: 'Nunito Sans', sans-serif;
   --font-weight-heading: 300;
   --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-slide-up: slide-up 0.3s ease-out;
 }
 
 html {
@@ -55,6 +56,17 @@ body {
   from {
     opacity: 0;
     transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
