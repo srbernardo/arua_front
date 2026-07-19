@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { Menu, Search, User, Heart, ShoppingCart, X, ArrowLeft, Clock, Trash2, LogOut } from 'lucide-react'
+import { Menu, Search, User, Heart, ShoppingCart, X, ArrowLeft, Clock, Trash2, LogOut, Package, MapPin, LogIn } from 'lucide-react'
 import { useProducts } from '../context/ProductsContext'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
@@ -35,6 +35,8 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick }: TopBarPro
   const [query, setQuery] = useState('')
   const [searchHistory, setSearchHistory] = useState<string[]>(loadHistory)
   const [authOpen, setAuthOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -43,6 +45,16 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick }: TopBarPro
       setTimeout(() => inputRef.current?.focus(), 100)
     }
   }, [searchOpen])
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false)
+      }
+    }
+    if (userMenuOpen) document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [userMenuOpen])
 
   const suggestions = useMemo(() => {
     if (!query.trim()) return []
@@ -101,12 +113,54 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick }: TopBarPro
           >
             <Search size={24} className="text-foreground-secondary" />
           </button>
-          <button
-            onClick={() => user ? logout() : setAuthOpen(true)}
-            className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
-          >
-            {user ? <LogOut size={24} className="text-foreground-secondary" /> : <User size={24} className="text-foreground-secondary" />}
-          </button>
+          {user ? (
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
+              >
+                <User size={24} className="text-foreground-primary" />
+              </button>
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-card rounded-xl shadow-lg border border-border py-2 animate-slide-up">
+                  <div className="px-4 py-2 border-b border-border">
+                    <span className="font-body text-xs text-foreground-secondary">Olá,</span>
+                    <p className="font-body text-sm font-semibold text-foreground-primary truncate">{user.name}</p>
+                  </div>
+                  <button
+                    onClick={() => setUserMenuOpen(false)}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-body text-foreground-primary hover:bg-surface transition-colors cursor-pointer"
+                  >
+                    <Package size={16} className="text-foreground-secondary" />
+                    Meus Pedidos
+                  </button>
+                  <button
+                    onClick={() => setUserMenuOpen(false)}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-body text-foreground-primary hover:bg-surface transition-colors cursor-pointer"
+                  >
+                    <MapPin size={16} className="text-foreground-secondary" />
+                    Meus Endereços
+                  </button>
+                  <div className="border-t border-border mt-1 pt-1">
+                    <button
+                      onClick={() => { logout(); setUserMenuOpen(false) }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-body text-destructive hover:bg-surface transition-colors cursor-pointer"
+                    >
+                      <LogOut size={16} className="text-destructive" />
+                      Sair
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => setAuthOpen(true)}
+              className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
+            >
+              <LogIn size={24} className="text-foreground-secondary" />
+            </button>
+          )}
           <button className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity">
             <Heart size={24} className="text-foreground-secondary" />
           </button>
