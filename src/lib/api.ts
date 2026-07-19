@@ -36,6 +36,12 @@ export const api = {
       return fetchAPI(`/products${qs}`)
     },
   },
+  users: {
+    lookup: (phone: string) =>
+      fetchAPI('/users/lookup', { method: 'POST', body: JSON.stringify({ phone }) }),
+    register: (name: string, phone: string) =>
+      fetchAPI('/users', { method: 'POST', body: JSON.stringify({ name, phone }) }),
+  },
   cart: {
     show: () => fetchAPI('/cart'),
     addItem: (variantId: number, quantity = 1) =>
