@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Heart, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Product } from '../types'
-import { useCart } from '../context/CartContext'
+import AddToCartModal from './AddToCartModal'
 
 interface ProductCardProps {
   product: Product
@@ -12,6 +12,7 @@ export default function ProductCard({ product, defaultColor }: ProductCardProps)
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? '')
   const [selectedColor, setSelectedColor] = useState('')
   const [imgIndex, setImgIndex] = useState(0)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const availableColors = useMemo(() => {
     const colors = product.variants
@@ -30,20 +31,8 @@ export default function ProductCard({ product, defaultColor }: ProductCardProps)
     }
   }, [availableColors, defaultColor, selectedColor])
 
-  const { addItem, setCartOpen } = useCart()
-
   const currentGroup = product.images_by_color.find((g) => g.color === selectedColor)
   const currentImages = currentGroup?.images ?? []
-
-  function handleAddToCart(e: React.MouseEvent) {
-    e.stopPropagation()
-    e.preventDefault()
-    const variant = product.variants.find((v) => v.size === selectedSize && v.color === selectedColor)
-    if (variant) {
-      addItem(product, variant)
-      setCartOpen(true)
-    }
-  }
 
   return (
     <div className="w-full flex flex-col bg-card overflow-hidden">
@@ -94,7 +83,7 @@ export default function ProductCard({ product, defaultColor }: ProductCardProps)
         )}
 
         <button
-          onClick={handleAddToCart}
+          onClick={(e) => { e.stopPropagation(); e.preventDefault(); setModalOpen(true) }}
           className="absolute bottom-2 right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center opacity-95 cursor-pointer shadow-md hover:bg-primary group/btn transition-colors z-10"
         >
           <Plus size={20} className="text-foreground-primary group-hover/btn:text-white transition-colors" />
@@ -136,6 +125,8 @@ export default function ProductCard({ product, defaultColor }: ProductCardProps)
           })}
         </div>
       </div>
+
+      <AddToCartModal product={product} isOpen={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
   )
 }
