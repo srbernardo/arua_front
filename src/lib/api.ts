@@ -37,6 +37,11 @@ async function fetchAPI(path: string, options?: RequestInit) {
     const body = await res.text();
     throw new Error(`API ${res.status}: ${body}`);
   }
+
+  if (res.status === 204) {
+    return null;
+  }
+
   return res.json();
 }
 
