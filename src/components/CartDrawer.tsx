@@ -2,7 +2,11 @@ import { useState, useMemo } from 'react'
 import { X, Minus, Plus, Trash2, ShoppingCart, Check } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 
-export default function CartDrawer() {
+interface CartDrawerProps {
+  onCheckout?: (selectedIds: Set<number>) => void
+}
+
+export default function CartDrawer({ onCheckout }: CartDrawerProps) {
   const { items, cartOpen, setCartOpen, removeItem, updateQuantity } = useCart()
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
 
@@ -174,6 +178,10 @@ export default function CartDrawer() {
               </div>
               <button
                 disabled={selectedCount === 0}
+                onClick={() => {
+                  setCartOpen(false)
+                  onCheckout?.(selectedIds)
+                }}
                 className="w-full h-12 bg-black text-white font-body text-sm font-semibold rounded-full cursor-pointer hover:bg-black/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {selectedCount > 0 ? `Finalizar Pedido (${selectedCount})` : 'Selecione itens para continuar'}
