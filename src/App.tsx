@@ -8,6 +8,7 @@ import Footer from './components/Footer'
 import Sidebar from './components/Sidebar'
 import CartDrawer from './components/CartDrawer'
 import CheckoutPage from './components/CheckoutPage'
+import AddressesModal from './components/AddressesModal'
 import { useProducts } from './context/ProductsContext'
 
 const PAGE_SIZE = 12
@@ -18,6 +19,7 @@ export default function App() {
   const [filterOpen, setFilterOpen] = useState(false)
   const [page, setPage] = useState<'home' | 'checkout'>('home')
   const [checkoutItemIds, setCheckoutItemIds] = useState<Set<number>>(new Set())
+  const [addressesOpen, setAddressesOpen] = useState(false)
   const [sortBy, setSortBy] = useState('default')
   const [activeCategory, setActiveCategory] = useState('ver-todos')
   const [searchQuery, setSearchQuery] = useState('')
@@ -150,9 +152,10 @@ export default function App() {
         onClose={() => setSidebarOpen(false)}
         onHome={handleHome}
       />
+      <AddressesModal open={addressesOpen} onClose={() => setAddressesOpen(false)} />
       <CartDrawer onCheckout={(ids) => { setCheckoutItemIds(ids); setPage('checkout') }} />
       <div className="w-full bg-card min-h-screen flex flex-col">
-        <TopBar onMenuClick={() => setSidebarOpen(true)} onSearch={handleSearch} onLogoClick={handleHome} />
+        <TopBar onMenuClick={() => setSidebarOpen(true)} onSearch={handleSearch} onLogoClick={handleHome} onAddresses={() => setAddressesOpen(true)} />
         <div className="w-full flex flex-col flex-1 pt-16 md:pt-20">
           <CategoryBar
             categories={visibleCategories}
