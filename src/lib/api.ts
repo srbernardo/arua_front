@@ -53,4 +53,11 @@ export const api = {
     clear: () =>
       fetchAPI('/cart/clear', { method: 'DELETE' }),
   },
+  orders: {
+    create: (data: {
+      address: { street: string; number: string; neighborhood: string; city: string; state: string; zip: string }
+      payment_method: string
+      item_ids: number[]
+    }) => fetchAPI('/orders', { method: 'POST', body: JSON.stringify(data) }),
+  },
 }
