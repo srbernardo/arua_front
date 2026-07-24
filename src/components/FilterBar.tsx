@@ -41,7 +41,7 @@ export default function FilterBar({ open, onToggle, sortBy, onSortChange, active
             Filtros
           </span>
           {activeFilters > 0 && (
-            <span className="w-5 h-5 bg-primary text-white text-[10px] font-semibold rounded-full flex items-center justify-center">
+            <span className="w-5 h-5 bg-foreground-primary text-white text-[10px] font-semibold rounded-full flex items-center justify-center">
               {activeFilters}
             </span>
           )}
@@ -117,7 +117,7 @@ export default function FilterBar({ open, onToggle, sortBy, onSortChange, active
               className={cn(
                 'w-full text-left px-4 py-3 rounded-lg font-body text-sm transition-colors cursor-pointer',
                 sortBy === option.value
-                  ? 'bg-primary/10 text-primary font-semibold'
+                  ? 'bg-foreground-primary/10 text-foreground-primary font-semibold'
                   : 'text-foreground-secondary hover:bg-surface hover:text-foreground-primary'
               )}
             >
