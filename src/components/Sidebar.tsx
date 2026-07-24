@@ -144,7 +144,7 @@ export default function Sidebar({ open, onClose, onHome }: SidebarProps) {
               <button
                 key={label}
                 onClick={onClose}
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-surface hover:bg-primary hover:text-white transition-colors cursor-pointer"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-surface hover:bg-foreground-primary hover:text-white transition-colors cursor-pointer"
                 title={label}
               >
                 <Icon size={18} />

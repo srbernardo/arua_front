@@ -84,7 +84,7 @@ export default function ProductCard({ product, defaultColor }: ProductCardProps)
 
         <button
           onClick={(e) => { e.stopPropagation(); e.preventDefault(); setModalOpen(true) }}
-          className="absolute bottom-2 right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center opacity-95 cursor-pointer shadow-md hover:bg-primary group/btn transition-colors z-10"
+          className="absolute bottom-2 right-2 w-10 h-10 bg-white rounded-full flex items-center justify-center opacity-95 cursor-pointer shadow-md hover:bg-foreground-primary group/btn transition-colors z-10"
         >
           <Plus size={20} className="text-foreground-primary group-hover/btn:text-white transition-colors" />
         </button>
