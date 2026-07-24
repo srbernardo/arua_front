@@ -7,6 +7,7 @@ import LoadMoreButton from './components/LoadMoreButton'
 import Footer from './components/Footer'
 import Sidebar from './components/Sidebar'
 import CartDrawer from './components/CartDrawer'
+import CheckoutPage from './components/CheckoutPage'
 import { useProducts } from './context/ProductsContext'
 
 const PAGE_SIZE = 12
@@ -15,6 +16,8 @@ export default function App() {
   const { categories, products, loading, error } = useProducts()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
+  const [page, setPage] = useState<'home' | 'checkout'>('home')
+  const [checkoutItemIds, setCheckoutItemIds] = useState<Set<number>>(new Set())
   const [sortBy, setSortBy] = useState('default')
   const [activeCategory, setActiveCategory] = useState('ver-todos')
   const [searchQuery, setSearchQuery] = useState('')
@@ -136,6 +139,10 @@ export default function App() {
 
   const hasMore = visibleCount < filtered.length
 
+  if (page === 'checkout') {
+    return <CheckoutPage onBack={() => setPage('home')} checkoutItemIds={checkoutItemIds} />
+  }
+
   return (
     <>
       <Sidebar
@@ -143,7 +150,7 @@ export default function App() {
         onClose={() => setSidebarOpen(false)}
         onHome={handleHome}
       />
-      <CartDrawer />
+      <CartDrawer onCheckout={(ids) => { setCheckoutItemIds(ids); setPage('checkout') }} />
       <div className="w-full bg-card min-h-screen flex flex-col">
         <TopBar onMenuClick={() => setSidebarOpen(true)} onSearch={handleSearch} onLogoClick={handleHome} />
         <div className="w-full flex flex-col flex-1 pt-16 md:pt-20">
@@ -170,7 +177,7 @@ export default function App() {
           <main className="flex flex-col px-4 md:px-6 py-6 pb-16 md:pb-20">
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-foreground-primary border-t-transparent rounded-full animate-spin" />
               </div>
             ) : error ? (
               <div className="flex items-center justify-center py-20">
