@@ -9,6 +9,7 @@ interface TopBarProps {
   onMenuClick: () => void
   onSearch: (query: string) => void
   onLogoClick: () => void
+  onAddresses?: () => void
 }
 
 const HISTORY_KEY = 'arua-search-history'
@@ -27,7 +28,7 @@ function saveHistory(history: string[]) {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
 }
 
-export default function TopBar({ onMenuClick, onSearch, onLogoClick }: TopBarProps) {
+export default function TopBar({ onMenuClick, onSearch, onLogoClick, onAddresses }: TopBarProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const { totalItems, setCartOpen } = useCart()
   const { products } = useProducts()
@@ -135,11 +136,11 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick }: TopBarPro
                     Meus Pedidos
                   </button>
                   <button
-                    onClick={() => setUserMenuOpen(false)}
+                    onClick={() => { onAddresses?.(); setUserMenuOpen(false) }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-body text-foreground-primary hover:bg-surface transition-colors cursor-pointer"
                   >
                     <MapPin size={16} className="text-foreground-secondary" />
-                    Meus Endereços
+                    Os Meus Endereços
                   </button>
                   <div className="border-t border-border mt-1 pt-1">
                     <button
