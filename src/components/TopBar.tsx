@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { Menu, Search, User, Heart, ShoppingCart, X, ArrowLeft, Clock, Trash2, LogOut, Package, MapPin, LogIn } from 'lucide-react'
+import { Menu, Search, CircleUser, User, Heart, ShoppingCart, X, ArrowLeft, Clock, Trash2, LogOut, Package, MapPin } from 'lucide-react'
 import { useProducts } from '../context/ProductsContext'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
@@ -119,7 +119,7 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick }: TopBarPro
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
               >
-                <User size={24} className="text-foreground-primary" />
+                <CircleUser size={24} className="text-foreground-primary" />
               </button>
               {userMenuOpen && (
                 <div className="absolute right-0 top-full mt-2 w-48 bg-card rounded-xl shadow-lg border border-border py-2 animate-slide-up">
@@ -158,7 +158,7 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick }: TopBarPro
               onClick={() => setAuthOpen(true)}
               className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
             >
-              <LogIn size={24} className="text-foreground-secondary" />
+              <User size={24} className="text-foreground-secondary" />
             </button>
           )}
           <button className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity">
