@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, MapPin, Plus, Check, Pencil, Trash2 } from 'lucide-react'
 import { api } from '../lib/api'
+import { useToast } from '../lib/toast'
 
 interface AddressesModalProps {
   open: boolean
@@ -22,6 +23,7 @@ export default function AddressesModal({ open, onClose }: AddressesModalProps) {
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const { toast } = useToast()
 
   const [form, setForm] = useState({ street: '', neighborhood: '', city: '', state: '', zip: '' })
 
@@ -55,28 +57,38 @@ export default function AddressesModal({ open, onClose }: AddressesModalProps) {
     try {
       if (editingId) {
         await api.addresses.update(editingId, form)
+        toast('Morada atualizada')
       } else {
         await api.addresses.create(form)
+        toast('Morada adicionada')
       }
       setShowForm(false)
       setEditingId(null)
       resetForm()
       loadAddresses()
-    } catch {}
+    } catch {
+      toast('Erro ao guardar morada', 'error')
+    }
   }
 
   async function handleDelete(id: number) {
     try {
       await api.addresses.destroy(id)
+      toast('Morada removida')
       loadAddresses()
-    } catch {}
+    } catch {
+      toast('Erro ao remover morada', 'error')
+    }
   }
 
   async function handleSetDefault(id: number) {
     try {
       await api.addresses.update(id, { default: true })
+      toast('Morada definida como padrão')
       loadAddresses()
-    } catch {}
+    } catch {
+      toast('Erro ao definir morada padrão', 'error')
+    }
   }
 
   function handleClose() {
@@ -111,56 +123,7 @@ export default function AddressesModal({ open, onClose }: AddressesModalProps) {
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              {addresses.map((a) => (
-                <div
-                  key={a.id}
-                  className="flex items-start justify-between p-4 rounded-xl border border-neutral-200 bg-white"
-                >
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="w-9 h-9 rounded-full bg-neutral-100 flex items-center justify-center shrink-0 mt-0.5">
-                      <MapPin size={16} className="text-neutral-600" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-body text-sm font-medium text-black">{a.street}</p>
-                      {a.neighborhood && <p className="font-body text-xs text-neutral-500">{a.neighborhood}</p>}
-                      <p className="font-body text-xs text-neutral-500">{a.city}, {a.state}</p>
-                      <p className="font-body text-xs text-neutral-500">{a.zip}</p>
-                      {a.default && (
-                        <span className="inline-block font-body text-[10px] font-semibold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full mt-1">
-                          PADRÃO
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0 ml-4">
-                    {!a.default && (
-                      <button
-                        onClick={() => handleSetDefault(a.id)}
-                        title="Definir como padrão"
-                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-100 transition-colors cursor-pointer"
-                      >
-                        <Check size={15} className="text-neutral-400 hover:text-black transition-colors" />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => openEdit(a)}
-                      title="Editar"
-                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-100 transition-colors cursor-pointer"
-                    >
-                      <Pencil size={15} className="text-neutral-400 hover:text-black transition-colors" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(a.id)}
-                      title="Remover"
-                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
-                    >
-                      <Trash2 size={15} className="text-neutral-400 hover:text-red-500 transition-colors" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-
-              {showForm && (
+              {showForm ? (
                 <form autoComplete="on" onSubmit={(e) => { e.preventDefault(); handleSave() }}>
                 <div className="p-4 rounded-xl border border-neutral-200 bg-neutral-50">
                   <h4 className="font-body text-sm font-semibold text-black mb-4">
@@ -250,16 +213,64 @@ export default function AddressesModal({ open, onClose }: AddressesModalProps) {
                   </div>
                 </div>
                 </form>
-              )}
-
-              {!showForm && (
-                <button
-                  onClick={openNew}
-                  className="w-full h-12 border-2 border-dashed border-neutral-300 rounded-xl flex items-center justify-center gap-2 cursor-pointer hover:border-neutral-400 transition-colors"
-                >
-                  <Plus size={18} className="text-neutral-500" />
-                  <span className="font-body text-sm font-medium text-neutral-600">Adicionar Morada</span>
-                </button>
+              ) : (
+                <>
+                  {addresses.map((a) => (
+                    <div
+                      key={a.id}
+                      className="flex items-start justify-between p-4 rounded-xl border border-neutral-200 bg-white"
+                    >
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className="w-9 h-9 rounded-full bg-neutral-100 flex items-center justify-center shrink-0 mt-0.5">
+                          <MapPin size={16} className="text-neutral-600" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-body text-sm font-medium text-black">{a.street}</p>
+                          {a.neighborhood && <p className="font-body text-xs text-neutral-500">{a.neighborhood}</p>}
+                          <p className="font-body text-xs text-neutral-500">{a.city}, {a.state}</p>
+                          <p className="font-body text-xs text-neutral-500">{a.zip}</p>
+                          {a.default && (
+                            <span className="inline-block font-body text-[10px] font-semibold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full mt-1">
+                              PADRÃO
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0 ml-4">
+                        {!a.default && (
+                          <button
+                            onClick={() => handleSetDefault(a.id)}
+                            title="Definir como padrão"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-100 transition-colors cursor-pointer"
+                          >
+                            <Check size={15} className="text-neutral-400 hover:text-black transition-colors" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => openEdit(a)}
+                          title="Editar"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-neutral-100 transition-colors cursor-pointer"
+                        >
+                          <Pencil size={15} className="text-neutral-400 hover:text-black transition-colors" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(a.id)}
+                          title="Remover"
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+                        >
+                          <Trash2 size={15} className="text-neutral-400 hover:text-red-500 transition-colors" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    onClick={openNew}
+                    className="w-full h-12 border-2 border-dashed border-neutral-300 rounded-xl flex items-center justify-center gap-2 cursor-pointer hover:border-neutral-400 transition-colors"
+                  >
+                    <Plus size={18} className="text-neutral-500" />
+                    <span className="font-body text-sm font-medium text-neutral-600">Adicionar Morada</span>
+                  </button>
+                </>
               )}
             </div>
           )}
