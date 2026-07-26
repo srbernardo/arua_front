@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { Heart, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Product } from '../types'
 import AddToCartModal from './AddToCartModal'
+import { useFavorites } from '../context/FavoritesContext'
+import { useAuth } from '../context/AuthContext'
 
 interface ProductCardProps {
   product: Product
@@ -13,6 +15,10 @@ export default function ProductCard({ product, defaultColor }: ProductCardProps)
   const [selectedColor, setSelectedColor] = useState('')
   const [imgIndex, setImgIndex] = useState(0)
   const [modalOpen, setModalOpen] = useState(false)
+  const { user } = useAuth()
+  const { isFavorite, toggleFavorite } = useFavorites()
+
+  const favorited = isFavorite(product.id)
 
   const availableColors = useMemo(() => {
     const colors = product.variants
@@ -95,8 +101,18 @@ export default function ProductCard({ product, defaultColor }: ProductCardProps)
           <span className="font-heading text-base font-semibold text-foreground-primary leading-tight">
             {product.name}
           </span>
-          <button className="w-6 h-6 flex items-center justify-center shrink-0 cursor-pointer hover:opacity-60 transition-opacity group/heart">
-            <Heart size={18} className="text-foreground-secondary group-hover/heart:text-red-500 transition-colors" />
+          <button
+            onClick={(e) => { e.stopPropagation(); e.preventDefault(); if (user) toggleFavorite(product.id) }}
+            className="w-6 h-6 flex items-center justify-center shrink-0 cursor-pointer hover:opacity-60 transition-opacity group/heart"
+          >
+            <Heart
+              size={18}
+              className={`transition-colors ${
+                favorited
+                  ? 'text-red-500 fill-red-500'
+                  : 'text-foreground-secondary group-hover/heart:text-red-500'
+              }`}
+            />
           </button>
         </div>
 
