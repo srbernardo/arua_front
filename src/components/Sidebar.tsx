@@ -1,14 +1,16 @@
-import { X, Home, ShoppingBag, LifeBuoy } from "lucide-react";
+import { X, Home, ShoppingBag, LifeBuoy, Heart } from "lucide-react";
 
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
   onHome: () => void;
+  onFavorites?: () => void;
 }
 
 const menuItems = [
   { label: "Home", icon: Home },
   { label: "Ver Produtos", icon: ShoppingBag },
+  { label: "Favoritos", icon: Heart },
   { label: "Customer Service", icon: LifeBuoy },
 ];
 
@@ -91,7 +93,7 @@ const socialLinks = [
   { label: "Pinterest", icon: PinterestIcon },
 ];
 
-export default function Sidebar({ open, onClose, onHome }: SidebarProps) {
+export default function Sidebar({ open, onClose, onHome, onFavorites }: SidebarProps) {
   return (
     <>
       {open && (
@@ -126,6 +128,8 @@ export default function Sidebar({ open, onClose, onHome }: SidebarProps) {
                 onClose();
                 if (item.label === "Home" || item.label === "Ver Produtos")
                   onHome();
+                if (item.label === "Favoritos" && onFavorites)
+                  onFavorites();
               }}
               className="w-full flex items-center gap-3 text-left px-4 py-3 rounded-lg font-body text-sm text-foreground-secondary hover:bg-surface hover:text-foreground-primary transition-colors cursor-pointer"
             >
