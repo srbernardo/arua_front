@@ -96,6 +96,16 @@ export const api = {
       item_ids: number[];
     }) => fetchAPI("/orders", { method: "POST", body: JSON.stringify(data) }),
   },
+  favorites: {
+    list: () => fetchAPI("/favorites"),
+    add: (productId: number) =>
+      fetchAPI("/favorites", {
+        method: "POST",
+        body: JSON.stringify({ product_id: productId }),
+      }),
+    remove: (productId: number) =>
+      fetchAPI(`/favorites/${productId}`, { method: "DELETE" }),
+  },
   addresses: {
     list: () => fetchAPI("/addresses"),
     create: (data: {
