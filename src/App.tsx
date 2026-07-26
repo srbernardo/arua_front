@@ -10,7 +10,9 @@ import CartDrawer from './components/CartDrawer'
 import CheckoutPage from './components/CheckoutPage'
 import AddressesModal from './components/AddressesModal'
 import FavoritesDrawer from './components/FavoritesDrawer'
+import ProductPage from './components/ProductPage'
 import { useProducts } from './context/ProductsContext'
+import type { Product } from './types'
 
 const PAGE_SIZE = 12
 
@@ -22,6 +24,7 @@ export default function App() {
   const [checkoutItemIds, setCheckoutItemIds] = useState<Set<number>>(new Set())
   const [addressesOpen, setAddressesOpen] = useState(false)
   const [favoritesOpen, setFavoritesOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [sortBy, setSortBy] = useState('default')
   const [activeCategory, setActiveCategory] = useState('ver-todos')
   const [searchQuery, setSearchQuery] = useState('')
@@ -124,6 +127,8 @@ export default function App() {
   }
 
   const handleHome = useCallback(() => {
+    setSelectedProduct(null)
+    setPage('home')
     setActiveCategory('ver-todos')
     setSearchQuery('')
     setActiveColor('')
@@ -145,6 +150,28 @@ export default function App() {
 
   if (page === 'checkout') {
     return <CheckoutPage onBack={() => setPage('home')} checkoutItemIds={checkoutItemIds} />
+  }
+
+  if (selectedProduct) {
+    return (
+      <>
+        <Sidebar
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          onHome={handleHome}
+          onFavorites={() => { setSidebarOpen(false); setFavoritesOpen(true) }}
+        />
+        <AddressesModal open={addressesOpen} onClose={() => setAddressesOpen(false)} />
+        <FavoritesDrawer open={favoritesOpen} onClose={() => setFavoritesOpen(false)} />
+        <CartDrawer onCheckout={(ids) => { setCheckoutItemIds(ids); setPage('checkout') }} onProductClick={(p) => setSelectedProduct(p)} />
+        <div className="w-full bg-card min-h-screen flex flex-col">
+          <TopBar onMenuClick={() => setSidebarOpen(true)} onSearch={handleSearch} onLogoClick={handleHome} onAddresses={() => setAddressesOpen(true)} onFavorites={() => setFavoritesOpen(true)} />
+          <div className="pt-16 md:pt-20 flex-1 flex flex-col">
+            <ProductPage product={selectedProduct} onBack={() => setSelectedProduct(null)} />
+          </div>
+        </div>
+      </>
+    )
   }
 
   return (
@@ -192,7 +219,7 @@ export default function App() {
               </div>
             ) : (
               <>
-                <ProductGrid products={filtered.slice(0, visibleCount)} defaultColor={activeColor} />
+                <ProductGrid products={filtered.slice(0, visibleCount)} defaultColor={activeColor} onProductClick={setSelectedProduct} />
                 {hasMore && <LoadMoreButton onLoadMore={handleLoadMore} />}
               </>
             )}
