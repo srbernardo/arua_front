@@ -313,7 +313,7 @@ export default function CheckoutPage({ onBack, checkoutItemIds }: CheckoutPagePr
                 <span className="font-body text-sm font-semibold text-black">Frete</span>
               </div>
               <p className="font-body text-sm text-neutral-600 ml-6">
-                ${shipping.toFixed(2)}
+{shipping.toFixed(2)} €
               </p>
             </div>
           </div>
@@ -337,7 +337,7 @@ export default function CheckoutPage({ onBack, checkoutItemIds }: CheckoutPagePr
                   </p>
                   <div className="flex justify-between items-center mt-1">
                     <span className="font-body text-xs text-neutral-400">Qtd: {item.quantity}</span>
-                    <span className="font-heading text-sm font-semibold text-black">${(item.product.price * item.quantity).toFixed(2)}</span>
+                    <span className="font-heading text-sm font-semibold text-black">{(item.product.price * item.quantity).toFixed(2)} €</span>
                   </div>
                 </div>
               </div>
@@ -347,7 +347,7 @@ export default function CheckoutPage({ onBack, checkoutItemIds }: CheckoutPagePr
           <div className="px-4 md:px-6 py-4 border-t border-neutral-200 flex flex-col gap-2.5">
             <div className="flex justify-between items-center">
               <span className="font-body text-sm text-neutral-600">Subtotal</span>
-              <span className="font-body text-sm text-black">${totalPrice.toFixed(2)}</span>
+              <span className="font-body text-sm text-black">{totalPrice.toFixed(2)} €</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="font-body text-sm text-neutral-600">Frete</span>
@@ -355,7 +355,7 @@ export default function CheckoutPage({ onBack, checkoutItemIds }: CheckoutPagePr
             </div>
             <div className="border-t border-neutral-200 pt-2.5 mt-1 flex justify-between items-center">
               <span className="font-heading text-sm font-semibold text-black">Total</span>
-              <span className="font-heading text-lg font-bold text-black">${total.toFixed(2)}</span>
+              <span className="font-heading text-lg font-bold text-black">{total.toFixed(2)} €</span>
             </div>
 
             <button

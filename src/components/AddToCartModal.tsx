@@ -66,7 +66,7 @@ export default function AddToCartModal({ product, isOpen, onClose }: AddToCartMo
             <img src={currentImage} alt={product.name} className="w-20 h-24 object-cover rounded-lg shrink-0" />
             <div className="flex flex-col gap-1">
               <span className="font-heading text-sm font-semibold text-foreground-primary">{product.name}</span>
-              <span className="font-heading text-lg font-bold text-black">${product.price.toFixed(2)}</span>
+              <span className="font-heading text-lg font-bold text-black">{product.price.toFixed(2)} €</span>
             </div>
           </div>
           <button onClick={onClose} className="cursor-pointer hover:opacity-70 transition-opacity shrink-0">
@@ -155,7 +155,7 @@ export default function AddToCartModal({ product, isOpen, onClose }: AddToCartMo
           className="w-full h-12 bg-black text-white font-body text-sm font-semibold rounded-full cursor-pointer hover:bg-black/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {selectedVariant && selectedVariant.stock > 0
-            ? `Adicionar ao Carrinho — $${(product.price * quantity).toFixed(2)}`
+            ? `Adicionar ao Carrinho — ${(product.price * quantity).toFixed(2)} €`
             : 'Indisponível'}
         </button>
       </div>

@@ -99,7 +99,7 @@ export default function FavoritesDrawer({ open, onClose }: FavoritesDrawerProps)
                     </span>
                     <p className="font-body text-sm font-medium text-black truncate">{product.name}</p>
                     <span className="font-heading text-sm font-semibold text-black">
-                      ${product.price.toFixed(2)}
+                      {product.price.toFixed(2)} €
                     </span>
                   </div>
                   <div className="flex flex-col items-center gap-1 shrink-0">
