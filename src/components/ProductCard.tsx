@@ -8,9 +8,10 @@ import { useAuth } from '../context/AuthContext'
 interface ProductCardProps {
   product: Product
   defaultColor?: string
+  onClick?: () => void
 }
 
-export default function ProductCard({ product, defaultColor }: ProductCardProps) {
+export default function ProductCard({ product, defaultColor, onClick }: ProductCardProps) {
   const [selectedSize] = useState(product.sizes[0] ?? '')
   const [selectedColor, setSelectedColor] = useState('')
   const [imgIndex, setImgIndex] = useState(0)
@@ -41,7 +42,7 @@ export default function ProductCard({ product, defaultColor }: ProductCardProps)
   const currentImages = currentGroup?.images ?? []
 
   return (
-    <div className="w-full flex flex-col bg-card overflow-hidden">
+    <div className="w-full flex flex-col bg-card overflow-hidden cursor-pointer" onClick={onClick}>
       <div className="w-full aspect-[4/5] relative overflow-hidden group">
         <button className="w-full h-full cursor-pointer overflow-hidden">
           <div
@@ -117,7 +118,7 @@ export default function ProductCard({ product, defaultColor }: ProductCardProps)
         </div>
 
         <span className="text-black font-heading text-lg font-bold leading-tight">
-          ${product.price.toFixed(2)}
+          {product.price.toFixed(2)} €
         </span>
 
 

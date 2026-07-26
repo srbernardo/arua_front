@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react'
 import { X, Minus, Plus, Trash2, ShoppingCart, Check } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import type { Product } from '../types'
 
 interface CartDrawerProps {
   onCheckout?: (selectedIds: Set<number>) => void
+  onProductClick?: (product: Product) => void
 }
 
 export default function CartDrawer({ onCheckout }: CartDrawerProps) {
@@ -124,7 +126,10 @@ export default function CartDrawer({ onCheckout }: CartDrawerProps) {
                   <div className="flex-1 flex flex-col justify-between min-w-0">
                     <div className="flex justify-between items-start gap-2">
                       <div className="flex flex-col min-w-0">
-                        <span className="font-body text-sm font-medium text-foreground-primary truncate">
+                        <span
+                          onClick={() => { setCartOpen(false); onProductClick?.(item.product) }}
+                          className="font-body text-sm font-medium text-foreground-primary truncate cursor-pointer hover:underline"
+                        >
                           {item.product.name}
                         </span>
                         <span className="font-body text-xs text-foreground-secondary/70 mt-0.5 flex items-center gap-1.5">
@@ -143,7 +148,7 @@ export default function CartDrawer({ onCheckout }: CartDrawerProps) {
                       </button>
                     </div>
                     <span className="font-heading text-sm font-semibold text-black">
-                      ${(item.product.price * item.quantity).toFixed(2)}
+                      {(item.product.price * item.quantity).toFixed(2)} €
                     </span>
                     <div className="flex items-center gap-2">
                       <button
@@ -173,7 +178,7 @@ export default function CartDrawer({ onCheckout }: CartDrawerProps) {
                   Subtotal{selectedCount > 0 && ` (${selectedCount} ${selectedCount === 1 ? 'item' : 'itens'})`}
                 </span>
                 <span className="font-heading text-lg font-bold text-foreground-primary">
-                  ${(selectedCount > 0 ? selectedTotal : items.reduce((sum, i) => sum + i.product.price * i.quantity, 0)).toFixed(2)}
+                  {(selectedCount > 0 ? selectedTotal : items.reduce((sum, i) => sum + i.product.price * i.quantity, 0)).toFixed(2)} €
                 </span>
               </div>
               <button
