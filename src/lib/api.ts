@@ -34,8 +34,20 @@ async function fetchAPI(path: string, options?: RequestInit) {
   });
 
   if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`API ${res.status}: ${body}`);
+    const text = await res.text();
+    let data: unknown = null;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      /* not json */
+    }
+    const err = new Error(`API ${res.status}: ${text}`) as Error & {
+      status: number;
+      data: unknown;
+    };
+    err.status = res.status;
+    err.data = data;
+    throw err;
   }
 
   if (res.status === 204) {
@@ -96,6 +108,8 @@ export const api = {
       payment_method: string;
       item_ids: number[];
     }) => fetchAPI("/orders", { method: "POST", body: JSON.stringify(data) }),
+    list: () => fetchAPI("/orders"),
+    show: (id: number) => fetchAPI(`/orders/${id}`),
   },
   favorites: {
     list: () => fetchAPI("/favorites"),
