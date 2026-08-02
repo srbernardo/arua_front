@@ -11,6 +11,7 @@ interface TopBarProps {
   onAddresses?: () => void
   onFavorites?: () => void
   onLoginClick: () => void
+  onOrders?: () => void
 }
 
 const HISTORY_KEY = 'arua-search-history'
@@ -29,7 +30,7 @@ function saveHistory(history: string[]) {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
 }
 
-export default function TopBar({ onMenuClick, onSearch, onLogoClick, onAddresses, onFavorites, onLoginClick }: TopBarProps) {
+export default function TopBar({ onMenuClick, onSearch, onLogoClick, onAddresses, onFavorites, onLoginClick, onOrders }: TopBarProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const { totalItems, setCartOpen, resetCart } = useCart()
   const { products } = useProducts()
@@ -129,7 +130,7 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick, onAddresses
                     <p className="font-body text-sm font-semibold text-foreground-primary truncate">{user.name}</p>
                   </div>
                   <button
-                    onClick={() => setUserMenuOpen(false)}
+                    onClick={() => { onOrders?.(); setUserMenuOpen(false) }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-body text-foreground-primary hover:bg-surface transition-colors cursor-pointer"
                   >
                     <Package size={16} className="text-foreground-secondary" />
