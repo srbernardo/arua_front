@@ -19,6 +19,8 @@ interface CartContextType {
   removeItem: (cartItemId: number) => void
   updateQuantity: (cartItemId: number, quantity: number) => void
   clearCart: () => void
+  syncCart: () => Promise<void>
+  resetCart: () => void
   totalItems: number
   totalPrice: number
   cartOpen: boolean
@@ -33,12 +35,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const token = localStorage.getItem('arua-cart-token')
-    if (!token) return
-    api.cart.show()
-      .then((data) => {
-        setItems(data.items.map(mapCartItem))
-      })
-      .catch(() => {})
+    const phone = localStorage.getItem('arua-phone')
+    if (phone && !token) {
+      api.cart.attach()
+        .then((data) => setItems(data.items.map(mapCartItem)))
+        .catch(() => {})
+    } else if (token) {
+      api.cart.show()
+        .then((data) => setItems(data.items.map(mapCartItem)))
+        .catch(() => {})
+    }
   }, [])
 
   const addItem = useCallback(async (product: Product, variant: Variant) => {
@@ -97,6 +103,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const syncCart = useCallback(async () => {
+    const data = await api.cart.attach()
+    setItems(data.items.map(mapCartItem))
+  }, [])
+
+  const resetCart = useCallback(() => {
+    setItems([])
+    localStorage.removeItem("arua-cart-token")
+  }, [])
+
   const totalItems = useMemo(
     () => items.reduce((sum, i) => sum + i.quantity, 0),
     [items]
@@ -109,7 +125,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice, cartOpen, setCartOpen }}
+      value={{ items, addItem, removeItem, updateQuantity, clearCart, syncCart, resetCart, totalItems, totalPrice, cartOpen, setCartOpen }}
     >
       {children}
     </CartContext.Provider>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, Loader2 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { useCart } from '../context/CartContext'
 import { api } from '../lib/api'
 
 interface AuthModalProps {
@@ -11,6 +12,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const { login } = useAuth()
+  const { syncCart } = useCart()
   const [phone, setPhone] = useState('')
   const [name, setName] = useState('')
   const [phoneExists, setPhoneExists] = useState<boolean | null>(null)
@@ -60,6 +62,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
     try {
       if (phoneExists) {
         login({ name, phone: rawDigits })
+        await syncCart()
         onSuccess?.()
         onClose()
       } else {
@@ -70,6 +73,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps
         }
         const data = await api.users.register(name.trim(), rawDigits)
         login(data.user)
+        await syncCart()
         onSuccess?.()
         onClose()
       }

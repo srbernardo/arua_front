@@ -74,6 +74,7 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ variant_id: variantId, quantity }),
       }),
+    attach: () => fetchAPI("/cart/attach", { method: "POST" }),
     updateItem: (id: number, quantity: number) =>
       fetchAPI(`/cart/items/${id}`, {
         method: "PATCH",

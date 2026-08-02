@@ -31,7 +31,7 @@ function saveHistory(history: string[]) {
 
 export default function TopBar({ onMenuClick, onSearch, onLogoClick, onAddresses, onFavorites, onLoginClick }: TopBarProps) {
   const [searchOpen, setSearchOpen] = useState(false)
-  const { totalItems, setCartOpen } = useCart()
+  const { totalItems, setCartOpen, resetCart } = useCart()
   const { products } = useProducts()
   const { user, logout } = useAuth()
   const [query, setQuery] = useState('')
@@ -144,7 +144,7 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick, onAddresses
                   </button>
                   <div className="border-t border-border mt-1 pt-1">
                     <button
-                      onClick={() => { logout(); setUserMenuOpen(false) }}
+                      onClick={() => { logout(); resetCart(); setUserMenuOpen(false) }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-body text-destructive hover:bg-surface transition-colors cursor-pointer"
                     >
                       <LogOut size={16} className="text-destructive" />
