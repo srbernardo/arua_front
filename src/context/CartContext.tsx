@@ -21,6 +21,7 @@ interface CartContextType {
   clearCart: () => void
   syncCart: () => Promise<void>
   resetCart: () => void
+  replaceItems: (items: CartItem[]) => void
   totalItems: number
   totalPrice: number
   cartOpen: boolean
@@ -113,6 +114,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("arua-cart-token")
   }, [])
 
+  const replaceItems = useCallback((next: CartItem[]) => {
+    setItems(next)
+  }, [])
+
   const totalItems = useMemo(
     () => items.reduce((sum, i) => sum + i.quantity, 0),
     [items]
@@ -125,7 +130,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, syncCart, resetCart, totalItems, totalPrice, cartOpen, setCartOpen }}
+      value={{ items, addItem, removeItem, updateQuantity, clearCart, syncCart, resetCart, replaceItems, totalItems, totalPrice, cartOpen, setCartOpen }}
     >
       {children}
     </CartContext.Provider>
