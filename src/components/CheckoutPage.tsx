@@ -1,11 +1,14 @@
 import { useState, useMemo, useEffect } from 'react'
-import { ChevronLeft, Smartphone, Banknote, Check, MapPin, Truck, Package, Plus, Pencil, Trash2 } from 'lucide-react'
+import { ChevronLeft, Smartphone, Banknote, Check, MapPin, Truck, MessageCircle, Plus } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../lib/toast'
 import { api } from '../lib/api'
+import type { CartItem } from '../context/CartContext'
 
 interface CheckoutPageProps {
   onBack: () => void
+  onItemsUnavailable: (message: string) => void
   checkoutItemIds: Set<number>
 }
 
@@ -21,15 +24,22 @@ interface SavedAddress {
   default: boolean
 }
 
-export default function CheckoutPage({ onBack, checkoutItemIds }: CheckoutPageProps) {
-  const { items: allItems, clearCart } = useCart()
+interface CreatedOrder {
+  order_number: string
+  whatsapp_url: string | null
+}
+
+export default function CheckoutPage({ onBack, onItemsUnavailable, checkoutItemIds }: CheckoutPageProps) {
+  const { items: allItems, replaceItems } = useCart()
   const { user } = useAuth()
+  const { toast } = useToast()
   const items = useMemo(() => allItems.filter((i) => checkoutItemIds.has(i.id)), [allItems, checkoutItemIds])
   const totalPrice = useMemo(() => items.reduce((sum, i) => sum + i.product.price * i.quantity, 0), [items])
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null)
   const [placing, setPlacing] = useState(false)
   const [done, setDone] = useState(false)
+  const [createdOrder, setCreatedOrder] = useState<CreatedOrder | null>(null)
 
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([])
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null)
@@ -90,14 +100,25 @@ export default function CheckoutPage({ onBack, checkoutItemIds }: CheckoutPagePr
         addressId = created.id
       }
 
-      await api.orders.create({
+      const res = await api.orders.create({
         address: { street: address.street, neighborhood: address.neighborhood, city: address.city, state: address.state, zip: address.zip },
         payment_method: paymentMethod,
         item_ids: items.map((i) => i.id),
       })
-      await clearCart()
+
+      replaceItems((res.cart?.items ?? []) as CartItem[])
+      setCreatedOrder({ order_number: res.order_number, whatsapp_url: res.whatsapp_url ?? null })
       setDone(true)
-    } catch {
+    } catch (e) {
+      const err = e as { status?: number; data?: { error?: string; cart?: { items?: CartItem[] } } }
+      const cart = err.data?.cart?.items
+      if (cart) {
+        replaceItems(cart)
+        onItemsUnavailable(err.data?.error ?? 'Alguns produtos já não estão disponíveis.')
+      } else {
+        toast(err.data?.error ?? 'Erro ao processar o pedido. Tenta novamente.', 'error')
+      }
+    } finally {
       setPlacing(false)
     }
   }
@@ -112,9 +133,25 @@ export default function CheckoutPage({ onBack, checkoutItemIds }: CheckoutPagePr
           <h2 className="font-heading text-xl font-semibold text-black mb-2">
             Pedido Confirmado!
           </h2>
+          {createdOrder?.order_number && (
+            <p className="font-body text-sm font-semibold text-black mb-2">
+              Pedido #{createdOrder.order_number}
+            </p>
+          )}
           <p className="font-body text-sm text-neutral-500 mb-6">
             Seu pedido foi realizado com sucesso. Você receberá atualizações do status por aqui.
           </p>
+          {createdOrder?.whatsapp_url && (
+            <a
+              href={createdOrder.whatsapp_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full h-12 bg-green-600 text-white font-body text-sm font-semibold rounded-full cursor-pointer hover:bg-green-700 transition-colors flex items-center justify-center gap-2 mb-3"
+            >
+              <MessageCircle size={18} />
+              Enviar detalhes por WhatsApp
+            </a>
+          )}
           <button
             onClick={onBack}
             className="w-full h-12 bg-black text-white font-body text-sm font-semibold rounded-full cursor-pointer hover:bg-black/80 transition-colors"
