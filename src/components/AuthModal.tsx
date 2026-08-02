@@ -6,9 +6,10 @@ import { api } from '../lib/api'
 interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
+  onSuccess?: () => void
 }
 
-export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
   const { login } = useAuth()
   const [phone, setPhone] = useState('')
   const [name, setName] = useState('')
@@ -59,6 +60,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       if (phoneExists) {
         login({ name, phone: rawDigits })
+        onSuccess?.()
         onClose()
       } else {
         if (!name.trim()) {
@@ -68,6 +70,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         }
         const data = await api.users.register(name.trim(), rawDigits)
         login(data.user)
+        onSuccess?.()
         onClose()
       }
     } catch {

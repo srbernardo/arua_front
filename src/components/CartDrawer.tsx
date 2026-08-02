@@ -8,7 +8,7 @@ interface CartDrawerProps {
   onProductClick?: (product: Product) => void
 }
 
-export default function CartDrawer({ onCheckout }: CartDrawerProps) {
+export default function CartDrawer({ onCheckout, onProductClick }: CartDrawerProps) {
   const { items, cartOpen, setCartOpen, removeItem, updateQuantity } = useCart()
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
 

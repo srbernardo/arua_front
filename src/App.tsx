@@ -9,19 +9,24 @@ import Sidebar from './components/Sidebar'
 import CartDrawer from './components/CartDrawer'
 import CheckoutPage from './components/CheckoutPage'
 import AddressesModal from './components/AddressesModal'
+import AuthModal from './components/AuthModal'
 import FavoritesDrawer from './components/FavoritesDrawer'
 import ProductPage from './components/ProductPage'
 import { useProducts } from './context/ProductsContext'
+import { useAuth } from './context/AuthContext'
 import type { Product } from './types'
 
 const PAGE_SIZE = 12
 
 export default function App() {
   const { categories, products, loading, error } = useProducts()
+  const { user } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
   const [page, setPage] = useState<'home' | 'checkout'>('home')
   const [checkoutItemIds, setCheckoutItemIds] = useState<Set<number>>(new Set())
+  const [authOpen, setAuthOpen] = useState(false)
+  const [pendingCheckoutIds, setPendingCheckoutIds] = useState<Set<number> | null>(null)
   const [addressesOpen, setAddressesOpen] = useState(false)
   const [favoritesOpen, setFavoritesOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
@@ -126,6 +131,24 @@ export default function App() {
     setVisibleCount(PAGE_SIZE)
   }
 
+  function handleAuthSuccess() {
+    if (pendingCheckoutIds) {
+      setCheckoutItemIds(pendingCheckoutIds)
+      setPendingCheckoutIds(null)
+      setPage('checkout')
+    }
+  }
+
+  function handleCheckout(ids: Set<number>) {
+    if (user) {
+      setCheckoutItemIds(ids)
+      setPage('checkout')
+    } else {
+      setPendingCheckoutIds(ids)
+      setAuthOpen(true)
+    }
+  }
+
   const handleHome = useCallback(() => {
     setSelectedProduct(null)
     setPage('home')
@@ -162,10 +185,11 @@ export default function App() {
           onFavorites={() => { setSidebarOpen(false); setFavoritesOpen(true) }}
         />
         <AddressesModal open={addressesOpen} onClose={() => setAddressesOpen(false)} />
+        <AuthModal isOpen={authOpen} onClose={() => { setAuthOpen(false); setPendingCheckoutIds(null) }} onSuccess={handleAuthSuccess} />
         <FavoritesDrawer open={favoritesOpen} onClose={() => setFavoritesOpen(false)} />
-        <CartDrawer onCheckout={(ids) => { setCheckoutItemIds(ids); setPage('checkout') }} onProductClick={(p) => setSelectedProduct(p)} />
+        <CartDrawer onCheckout={handleCheckout} onProductClick={(p) => setSelectedProduct(p)} />
         <div className="w-full bg-card min-h-screen flex flex-col">
-          <TopBar onMenuClick={() => setSidebarOpen(true)} onSearch={handleSearch} onLogoClick={handleHome} onAddresses={() => setAddressesOpen(true)} onFavorites={() => setFavoritesOpen(true)} />
+          <TopBar onMenuClick={() => setSidebarOpen(true)} onSearch={handleSearch} onLogoClick={handleHome} onAddresses={() => setAddressesOpen(true)} onFavorites={() => setFavoritesOpen(true)} onLoginClick={() => setAuthOpen(true)} />
           <div className="pt-16 md:pt-20 flex-1 flex flex-col">
             <ProductPage product={selectedProduct} onBack={() => setSelectedProduct(null)} />
           </div>
@@ -183,10 +207,11 @@ export default function App() {
         onFavorites={() => { setSidebarOpen(false); setFavoritesOpen(true) }}
       />
       <AddressesModal open={addressesOpen} onClose={() => setAddressesOpen(false)} />
+      <AuthModal isOpen={authOpen} onClose={() => { setAuthOpen(false); setPendingCheckoutIds(null) }} onSuccess={handleAuthSuccess} />
       <FavoritesDrawer open={favoritesOpen} onClose={() => setFavoritesOpen(false)} />
-      <CartDrawer onCheckout={(ids) => { setCheckoutItemIds(ids); setPage('checkout') }} />
+      <CartDrawer onCheckout={handleCheckout} />
       <div className="w-full bg-card min-h-screen flex flex-col">
-        <TopBar onMenuClick={() => setSidebarOpen(true)} onSearch={handleSearch} onLogoClick={handleHome} onAddresses={() => setAddressesOpen(true)} onFavorites={() => setFavoritesOpen(true)} />
+        <TopBar onMenuClick={() => setSidebarOpen(true)} onSearch={handleSearch} onLogoClick={handleHome} onAddresses={() => setAddressesOpen(true)} onFavorites={() => setFavoritesOpen(true)} onLoginClick={() => setAuthOpen(true)} />
         <div className="w-full flex flex-col flex-1 pt-16 md:pt-20">
           <CategoryBar
             categories={visibleCategories}

@@ -3,7 +3,6 @@ import { Menu, Search, CircleUser, User, Heart, ShoppingCart, X, ArrowLeft, Cloc
 import { useProducts } from '../context/ProductsContext'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
-import AuthModal from './AuthModal'
 
 interface TopBarProps {
   onMenuClick: () => void
@@ -11,6 +10,7 @@ interface TopBarProps {
   onLogoClick: () => void
   onAddresses?: () => void
   onFavorites?: () => void
+  onLoginClick: () => void
 }
 
 const HISTORY_KEY = 'arua-search-history'
@@ -29,14 +29,13 @@ function saveHistory(history: string[]) {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history))
 }
 
-export default function TopBar({ onMenuClick, onSearch, onLogoClick, onAddresses, onFavorites }: TopBarProps) {
+export default function TopBar({ onMenuClick, onSearch, onLogoClick, onAddresses, onFavorites, onLoginClick }: TopBarProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const { totalItems, setCartOpen } = useCart()
   const { products } = useProducts()
   const { user, logout } = useAuth()
   const [query, setQuery] = useState('')
   const [searchHistory, setSearchHistory] = useState<string[]>(loadHistory)
-  const [authOpen, setAuthOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -157,7 +156,7 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick, onAddresses
             </div>
           ) : (
             <button
-              onClick={() => setAuthOpen(true)}
+              onClick={onLoginClick}
               className="w-11 h-11 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
             >
               <User size={24} className="text-foreground-secondary" />
@@ -300,8 +299,6 @@ export default function TopBar({ onMenuClick, onSearch, onLogoClick, onAddresses
           )}
         </div>
       </div>
-
-      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
     </>
   )
 }
