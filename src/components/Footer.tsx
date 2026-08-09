@@ -1,21 +1,52 @@
-const linkGroups = [
+import { legalSectionLabels, type LegalSection } from './LegalPage'
+
+interface FooterProps {
+  onNavigate: (target: string, anchor?: string) => void
+}
+
+interface FooterLink {
+  label: string
+  target?: string
+  anchor?: string
+  href?: string
+  text?: boolean
+}
+
+const linkGroups: { title: string; links: FooterLink[] }[] = [
   {
     title: 'Atendimento',
-    links: ['Central de Ajuda', 'Trocas e Devoluções', 'Perguntas Frequentes', 'Seg-Sex: 9h às 18h', 'Sáb: 9h às 14h'],
+    links: [
+      { label: 'Perguntas Frequentes', target: 'service', anchor: 'atendimento-faq' },
+      { label: 'Envio de Encomendas', target: 'service', anchor: 'atendimento-envio' },
+      { label: 'Livro de Reclamações', target: 'service', anchor: 'atendimento-reclamacoes' },
+      { label: 'Contacte-nos', target: 'service', anchor: 'atendimento-contato' },
+      { label: 'Seg-Sáb: 9h às 18h', text: true },
+    ],
   },
   {
     title: 'Institucional',
-    links: ['Sobre Nós'],
+    links: [{ label: 'Sobre Nós', target: 'about' }],
   },
   {
     title: 'Legal',
-    links: ['Avisos Legais', 'Política de Privacidade', 'Termos de Uso', 'Cookies'],
+    links: [
+      { label: legalSectionLabels['cookies-definitions'], target: 'cookies-definitions' },
+      { label: legalSectionLabels.cookies, target: 'cookies' },
+      { label: legalSectionLabels.privacy, target: 'privacy' },
+      { label: legalSectionLabels.terms, target: 'terms' },
+    ],
   },
   {
     title: 'Contato',
-    links: ['contato@bikinistore.com.br', '(11) 99999-9999'],
+    links: [
+      { label: 'b.brotelle@gmail.com', href: 'mailto:b.brotelle@gmail.com' },
+      { label: '+351 211 203 637', href: 'tel:+351211203637' },
+      { label: 'WhatsApp', href: 'https://wa.me/+351211203637' },
+    ],
   },
 ]
+
+const legalSections: LegalSection[] = ['cookies-definitions', 'cookies', 'privacy', 'terms']
 
 function InstagramIcon({ size }: { size: number }) {
   return (
@@ -53,22 +84,22 @@ function TikTokIcon({ size }: { size: number }) {
 }
 
 const socialIcons = [
-  { icon: InstagramIcon, label: 'Instagram' },
-  { icon: TwitterIcon, label: 'Twitter' },
-  { icon: FacebookIcon, label: 'Facebook' },
-  { icon: TikTokIcon, label: 'TikTok' },
+  { icon: InstagramIcon, label: 'Instagram', href: 'https://www.instagram.com' },
+  { icon: TwitterIcon, label: 'Twitter', href: 'https://x.com' },
+  { icon: FacebookIcon, label: 'Facebook', href: 'https://www.facebook.com' },
+  { icon: TikTokIcon, label: 'TikTok', href: 'https://www.tiktok.com' },
 ]
 
-export default function Footer() {
+export default function Footer({ onNavigate }: FooterProps) {
   return (
     <footer className="w-full bg-primary px-4 md:px-10 py-6 md:py-8 flex flex-col gap-0">
       <div className="flex flex-col md:flex-row md:justify-between w-full gap-6 md:gap-0">
         <div className="flex flex-col">
           <span className="font-heading text-2xl font-bold text-white leading-tight">
-            Bikini Store
+            ARUA
           </span>
           <span className="font-body text-sm text-[#FFF5ED] leading-relaxed">
-            Biquínis feitos para o seu verão
+            Moda feminina com estilo e conforto
           </span>
         </div>
 
@@ -77,10 +108,17 @@ export default function Footer() {
             Siga-nos
           </span>
           <div className="flex items-center gap-2 mt-1">
-            {socialIcons.map(({ icon: Icon, label }) => (
-              <button key={label} className="w-10 h-10 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity bg-white/10 rounded-full text-white">
+            {socialIcons.map(({ icon: Icon, label, href }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={label}
+                className="w-10 h-10 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity bg-white/10 rounded-full text-white"
+              >
                 <Icon size={20} />
-              </button>
+              </a>
             ))}
           </div>
         </div>
@@ -92,26 +130,55 @@ export default function Footer() {
             <span className="font-heading text-sm font-semibold text-white leading-tight mb-1">
               {group.title}
             </span>
-            {group.links.map((link) => (
-              <button
-                key={link}
-                className="font-body text-[13px] text-[#FFF5ED] leading-relaxed text-left cursor-pointer hover:text-white transition-colors"
-              >
-                {link}
-              </button>
-            ))}
+            {group.links.map((link) => {
+              if (link.text) {
+                return (
+                  <span key={link.label} className="font-body text-[13px] text-[#FFF5ED] leading-relaxed">
+                    {link.label}
+                  </span>
+                )
+              }
+              if (link.href) {
+                return (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target={link.href.startsWith('http') ? '_blank' : undefined}
+                    rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                    className="font-body text-[13px] text-[#FFF5ED] leading-relaxed text-left cursor-pointer hover:text-white transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                )
+              }
+              return (
+                <button
+                  key={link.label}
+                  onClick={() => link.target && onNavigate(link.target, link.anchor)}
+                  className="font-body text-[13px] text-[#FFF5ED] leading-relaxed text-left cursor-pointer hover:text-white transition-colors"
+                >
+                  {link.label}
+                </button>
+              )
+            })}
           </div>
         ))}
       </div>
 
       <div className="flex flex-col md:flex-row md:justify-between md:items-center w-full mt-[62px] border-t border-white/20 pt-4 md:pt-0 gap-4 md:gap-0">
         <span className="font-body text-xs text-[#FFE8D6] leading-relaxed">
-          © 2024 Bikini Store. Todos os direitos reservados.
+          © 2026 ARUA. Todos os direitos reservados.
         </span>
         <div className="flex items-center gap-0">
-          <button className="font-body text-xs text-[#FFE8D6] cursor-pointer hover:text-white transition-colors">Política de Privacidade</button>
-          <button className="font-body text-xs text-[#FFE8D6] ml-4 cursor-pointer hover:text-white transition-colors">Termos de Serviço</button>
-          <button className="font-body text-xs text-[#FFE8D6] ml-4 cursor-pointer hover:text-white transition-colors">Configurar Cookies</button>
+          {legalSections.map((section, index) => (
+            <button
+              key={section}
+              onClick={() => onNavigate(section)}
+              className={`font-body text-xs text-[#FFE8D6] cursor-pointer hover:text-white transition-colors ${index > 0 ? 'ml-4' : ''}`}
+            >
+              {legalSectionLabels[section]}
+            </button>
+          ))}
         </div>
       </div>
     </footer>
