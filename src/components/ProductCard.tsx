@@ -22,11 +22,8 @@ export default function ProductCard({ product, defaultColor, onClick }: ProductC
   const favorited = isFavorite(product.id)
 
   const availableColors = useMemo(() => {
-    const colors = product.variants
-      .filter((v) => v.size === selectedSize)
-      .map((v) => v.color)
-    return [...new Set(colors)]
-  }, [product.variants, selectedSize])
+    return [...new Set(product.variants.map((v) => v.color))]
+  }, [product.variants])
 
   useEffect(() => {
     if (defaultColor && availableColors.includes(defaultColor)) {
@@ -132,7 +129,7 @@ export default function ProductCard({ product, defaultColor, onClick }: ProductC
                 key={color}
                 onClick={(e) => { e.stopPropagation(); e.preventDefault(); setSelectedColor(color); setImgIndex(0) }}
                 disabled={outOfStock}
-                className={`w-5 h-5 rounded-sm cursor-pointer hover:scale-110 transition-transform ${
+                className={`w-5 h-5 rounded-md cursor-pointer hover:scale-110 transition-transform ${
                   outOfStock ? 'opacity-30 cursor-not-allowed' : ''
                 } ${color === selectedColor ? 'ring-2 ring-foreground-primary ring-offset-1' : ''}`}
                 style={{ backgroundColor: color }}

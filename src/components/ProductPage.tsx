@@ -238,7 +238,7 @@ export default function ProductPage({ product, onBack }: ProductPageProps) {
                         setQuantity(1);
                       }}
                       disabled={!hasStock}
-                      className={`w-9 h-9 rounded-full cursor-pointer hover:scale-110 transition-all flex items-center justify-center ${
+                      className={`w-9 h-9 rounded-lg cursor-pointer hover:scale-110 transition-all flex items-center justify-center ${
                         !hasStock ? "opacity-30 cursor-not-allowed" : ""
                       } ${color === selectedColor ? "ring-2 ring-black ring-offset-2" : ""}`}
                       style={{ backgroundColor: color }}

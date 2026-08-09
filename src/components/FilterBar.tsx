@@ -77,7 +77,7 @@ export default function FilterBar({ open, onToggle, sortBy, onSortChange, active
                 <button
                   key={color}
                   onClick={() => onColorChange(color)}
-                  className={`w-7 h-7 rounded-full cursor-pointer hover:scale-110 transition-transform ${
+                  className={`w-7 h-7 rounded-lg cursor-pointer hover:scale-110 transition-transform ${
                     color === activeColor ? 'ring-2 ring-foreground-primary ring-offset-2' : ''
                   }`}
                   style={{ backgroundColor: color }}

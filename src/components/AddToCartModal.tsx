@@ -16,11 +16,8 @@ export default function AddToCartModal({ product, isOpen, onClose }: AddToCartMo
   const { addItem, setCartOpen } = useCart()
 
   const availableColors = useMemo(() => {
-    const colors = product.variants
-      .filter((v) => v.size === selectedSize)
-      .map((v) => v.color)
-    return [...new Set(colors)]
-  }, [product.variants, selectedSize])
+    return [...new Set(product.variants.map((v) => v.color))]
+  }, [product.variants])
 
   const availableSizes = useMemo(() => {
     if (!selectedColor) return product.sizes
@@ -77,31 +74,6 @@ export default function AddToCartModal({ product, isOpen, onClose }: AddToCartMo
           </button>
         </div>
 
-        {product.sizes.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <span className="font-body text-xs font-medium text-foreground-secondary uppercase tracking-wider">Tamanho</span>
-            <div className="flex items-center gap-2">
-              {availableSizes.map((size) => {
-                const hasStock = product.variants.some((v) => v.size === size && v.color === selectedColor && v.stock > 0)
-                return (
-                  <button
-                    key={size}
-                    onClick={() => { setSelectedSize(size); setQuantity(1) }}
-                    disabled={!hasStock}
-                    className={`min-w-[40px] h-9 px-3 rounded-lg text-xs font-body font-semibold transition-all cursor-pointer ${
-                      size === selectedSize
-                        ? 'bg-foreground-primary text-white'
-                        : 'bg-surface text-foreground-secondary hover:bg-neutral-200'
-                    } ${!hasStock ? 'opacity-30 cursor-not-allowed' : ''}`}
-                  >
-                    {size}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
         {availableColors.length > 0 && (
           <div className="flex flex-col gap-2">
             <span className="font-body text-xs font-medium text-foreground-secondary uppercase tracking-wider">Cor</span>
@@ -120,6 +92,31 @@ export default function AddToCartModal({ product, isOpen, onClose }: AddToCartMo
                     style={{ backgroundColor: color }}
                   >
                     {color === selectedColor && <Check size={16} className={isLightColor(color) ? 'text-black' : 'text-white'} />}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {product.sizes.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <span className="font-body text-xs font-medium text-foreground-secondary uppercase tracking-wider">Tamanho</span>
+            <div className="flex items-center gap-2">
+              {availableSizes.map((size) => {
+                const hasStock = product.variants.some((v) => v.size === size && v.color === selectedColor && v.stock > 0)
+                return (
+                  <button
+                    key={size}
+                    onClick={() => { setSelectedSize(size); setQuantity(1) }}
+                    disabled={!hasStock}
+                    className={`min-w-[40px] h-9 px-3 rounded-lg text-xs font-body font-semibold transition-all cursor-pointer ${
+                      size === selectedSize
+                        ? 'bg-foreground-primary text-white'
+                        : 'bg-surface text-foreground-secondary hover:bg-neutral-200'
+                    } ${!hasStock ? 'opacity-30 cursor-not-allowed' : ''}`}
+                  >
+                    {size}
                   </button>
                 )
               })}
