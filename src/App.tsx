@@ -14,6 +14,9 @@ import FavoritesDrawer from './components/FavoritesDrawer'
 import OrdersModal from './components/OrdersModal'
 import OrderDetailsPage from './components/OrderDetailsPage'
 import ProductPage from './components/ProductPage'
+import AboutPage from './components/AboutPage'
+import CustomerServicePage from './components/CustomerServicePage'
+import LegalPage, { type LegalSection } from './components/LegalPage'
 import { useProducts } from './context/ProductsContext'
 import { useAuth } from './context/AuthContext'
 import { useCart } from './context/CartContext'
@@ -29,7 +32,8 @@ export default function App() {
   const { toast } = useToast()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
-  const [page, setPage] = useState<'home' | 'checkout' | 'order'>('home')
+  const [page, setPage] = useState<'home' | 'checkout' | 'order' | 'about' | 'service' | 'legal'>('home')
+  const [legalSection, setLegalSection] = useState<LegalSection>('cookies')
   const [checkoutItemIds, setCheckoutItemIds] = useState<Set<number>>(new Set())
   const [authOpen, setAuthOpen] = useState(false)
   const [pendingCheckoutIds, setPendingCheckoutIds] = useState<Set<number> | null>(null)
@@ -174,6 +178,9 @@ export default function App() {
 
   const handleHome = useCallback(() => {
     setSelectedProduct(null)
+    if (window.location.hash) {
+      history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
     setPage('home')
     setActiveCategory('ver-todos')
     setSearchQuery('')
@@ -188,11 +195,45 @@ export default function App() {
     setVisibleCount(PAGE_SIZE)
   }, [])
 
+  const handleNavigate = useCallback((target: string, anchor?: string) => {
+    setSelectedProduct(null)
+    if (anchor) {
+      const el = document.getElementById(anchor)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      } else {
+        window.location.hash = anchor
+      }
+    } else {
+      window.scrollTo(0, 0)
+    }
+    if (target === 'about') {
+      setPage('about')
+    } else if (target === 'service') {
+      setPage('service')
+    } else {
+      setLegalSection(target as LegalSection)
+      setPage('legal')
+    }
+  }, [])
+
   const handleLoadMore = useCallback(() => {
     setVisibleCount((prev) => prev + PAGE_SIZE)
   }, [])
 
   const hasMore = visibleCount < filtered.length
+
+  if (page === 'about') {
+    return <AboutPage onBack={handleHome} onNavigate={handleNavigate} />
+  }
+
+  if (page === 'service') {
+    return <CustomerServicePage onBack={handleHome} onNavigate={handleNavigate} />
+  }
+
+  if (page === 'legal') {
+    return <LegalPage section={legalSection} onBack={handleHome} onNavigate={handleNavigate} />
+  }
 
   if (page === 'checkout') {
     return <CheckoutPage onBack={() => setPage('home')} onItemsUnavailable={handleItemsUnavailable} checkoutItemIds={checkoutItemIds} />
@@ -210,6 +251,7 @@ export default function App() {
           onClose={() => setSidebarOpen(false)}
           onHome={handleHome}
           onFavorites={() => { setSidebarOpen(false); setFavoritesOpen(true) }}
+          onNavigate={handleNavigate}
         />
         <AddressesModal open={addressesOpen} onClose={() => setAddressesOpen(false)} />
         <AuthModal isOpen={authOpen} onClose={() => { setAuthOpen(false); setPendingCheckoutIds(null) }} onSuccess={handleAuthSuccess} />
@@ -233,6 +275,7 @@ export default function App() {
         onClose={() => setSidebarOpen(false)}
         onHome={handleHome}
         onFavorites={() => { setSidebarOpen(false); setFavoritesOpen(true) }}
+        onNavigate={handleNavigate}
       />
       <AddressesModal open={addressesOpen} onClose={() => setAddressesOpen(false)} />
       <AuthModal isOpen={authOpen} onClose={() => { setAuthOpen(false); setPendingCheckoutIds(null) }} onSuccess={handleAuthSuccess} />
@@ -279,7 +322,7 @@ export default function App() {
             )}
           </main>
         </div>
-        <Footer />
+        <Footer onNavigate={handleNavigate} />
       </div>
     </>
   )
