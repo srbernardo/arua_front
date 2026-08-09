@@ -76,9 +76,7 @@ export default function ProductPage({ product, onBack }: ProductPageProps) {
 
   function handleAdd() {
     if (!selectedVariant) return;
-    for (let i = 0; i < quantity; i++) {
-      addItem(product, selectedVariant);
-    }
+    addItem(product, selectedVariant, quantity);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   }

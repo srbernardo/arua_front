@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { X, Minus, Plus, Trash2, ShoppingCart, Check } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import type { Product } from '../types'
@@ -9,8 +9,7 @@ interface CartDrawerProps {
 }
 
 export default function CartDrawer({ onCheckout, onProductClick }: CartDrawerProps) {
-  const { items, cartOpen, setCartOpen, removeItem, updateQuantity } = useCart()
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const { items, cartOpen, setCartOpen, removeItem, updateQuantity, selectedIds, setSelectedIds } = useCart()
 
   const allSelected = items.length > 0 && items.every((i) => selectedIds.has(i.id))
 

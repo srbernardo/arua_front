@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useMemo, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef, type ReactNode, type Dispatch, type SetStateAction } from 'react'
 import type { Product, Variant } from '../types'
 import { api } from '../lib/api'
 
@@ -15,7 +15,7 @@ export interface CartItem {
 
 interface CartContextType {
   items: CartItem[]
-  addItem: (product: Product, variant: Variant) => void
+  addItem: (product: Product, variant: Variant, quantity?: number) => void
   removeItem: (cartItemId: number) => void
   updateQuantity: (cartItemId: number, quantity: number) => void
   clearCart: () => void
@@ -26,6 +26,8 @@ interface CartContextType {
   totalPrice: number
   cartOpen: boolean
   setCartOpen: (open: boolean) => void
+  selectedIds: Set<number>
+  setSelectedIds: Dispatch<SetStateAction<Set<number>>>
 }
 
 const CartContext = createContext<CartContextType | null>(null)
@@ -33,6 +35,20 @@ const CartContext = createContext<CartContextType | null>(null)
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
   const [cartOpen, setCartOpen] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const itemsRef = useRef<CartItem[]>([])
+
+  useEffect(() => {
+    itemsRef.current = items
+  }, [items])
+
+  useEffect(() => {
+    setSelectedIds((prev) => {
+      const ids = new Set(items.map((i) => i.id))
+      const pruned = [...prev].filter((id) => ids.has(id))
+      return pruned.length === prev.size ? prev : new Set(pruned)
+    })
+  }, [items])
 
   useEffect(() => {
     const token = localStorage.getItem('arua-cart-token')
@@ -48,24 +64,43 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const addItem = useCallback(async (product: Product, variant: Variant) => {
+  const addItem = useCallback(async (product: Product, variant: Variant, quantity = 1) => {
+    const prevItems = itemsRef.current
+    const existingId = prevItems.find(
+      (i) => i.product.id === product.id && i.variant.size === variant.size && i.variant.color === variant.color
+    )?.id
+
+    const markSelected = (id: number | undefined) => {
+      if (id == null) return
+      setSelectedIds((prev) => {
+        if (prev.has(id)) return prev
+        const next = new Set(prev)
+        next.add(id)
+        return next
+      })
+    }
+
     try {
-      const data = await api.cart.addItem(variant.id, 1)
-      setItems(data.items.map(mapCartItem))
+      const data = await api.cart.addItem(variant.id, quantity)
+      const next = data.items.map(mapCartItem)
+      setItems(next)
+      const addedId = next.find((i: CartItem) => !prevItems.some((p) => p.id === i.id))?.id ?? existingId
+      markSelected(addedId)
     } catch {
-      setItems((prev) => {
-        const existing = prev.find(
-          (i) => i.product.id === product.id && i.variant.size === variant.size && i.variant.color === variant.color
-        )
-        if (existing) {
-          return prev.map((i) =>
+      if (existingId != null) {
+        markSelected(existingId)
+        setItems((prev) =>
+          prev.map((i) =>
             i.product.id === product.id && i.variant.size === variant.size && i.variant.color === variant.color
-              ? { ...i, quantity: i.quantity + 1 }
+              ? { ...i, quantity: i.quantity + quantity }
               : i
           )
-        }
-        return [...prev, { id: Date.now(), product, variant: { size: variant.size, color: variant.color, sku: variant.sku }, quantity: 1 }]
-      })
+        )
+      } else {
+        const newItem = { id: Date.now(), product, variant: { size: variant.size, color: variant.color, sku: variant.sku }, quantity }
+        markSelected(newItem.id)
+        setItems((prev) => [...prev, newItem])
+      }
     }
   }, [])
 
@@ -130,7 +165,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, syncCart, resetCart, replaceItems, totalItems, totalPrice, cartOpen, setCartOpen }}
+      value={{ items, addItem, removeItem, updateQuantity, clearCart, syncCart, resetCart, replaceItems, totalItems, totalPrice, cartOpen, setCartOpen, selectedIds, setSelectedIds }}
     >
       {children}
     </CartContext.Provider>

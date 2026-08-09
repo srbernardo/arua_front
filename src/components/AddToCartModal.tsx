@@ -45,9 +45,7 @@ export default function AddToCartModal({ product, isOpen, onClose }: AddToCartMo
 
   function handleAdd() {
     if (!selectedVariant) return
-    for (let i = 0; i < quantity; i++) {
-      addItem(product, selectedVariant)
-    }
+    addItem(product, selectedVariant, quantity)
     onClose()
     setCartOpen(true)
   }
