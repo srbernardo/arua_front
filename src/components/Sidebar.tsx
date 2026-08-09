@@ -5,13 +5,14 @@ interface SidebarProps {
   onClose: () => void;
   onHome: () => void;
   onFavorites?: () => void;
+  onNavigate: (target: string, anchor?: string) => void;
 }
 
 const menuItems = [
-  { label: "Home", icon: Home },
-  { label: "Ver Produtos", icon: ShoppingBag },
-  { label: "Favoritos", icon: Heart },
-  { label: "Customer Service", icon: LifeBuoy },
+  { label: "Home", icon: Home, target: "home" },
+  { label: "Ver Produtos", icon: ShoppingBag, target: "home" },
+  { label: "Favoritos", icon: Heart, target: "favorites" },
+  { label: "Atendimento ao Cliente", icon: LifeBuoy, target: "service" },
 ];
 
 function InstagramIcon({ size }: { size: number }) {
@@ -87,13 +88,13 @@ function PinterestIcon({ size }: { size: number }) {
 }
 
 const socialLinks = [
-  { label: "Instagram", icon: InstagramIcon },
-  { label: "WhatsApp", icon: WhatsAppIcon },
-  { label: "TikTok", icon: TikTokIcon },
-  { label: "Pinterest", icon: PinterestIcon },
+  { label: "Instagram", icon: InstagramIcon, href: "https://www.instagram.com" },
+  { label: "WhatsApp", icon: WhatsAppIcon, href: "https://wa.me/+351211203637" },
+  { label: "TikTok", icon: TikTokIcon, href: "https://www.tiktok.com" },
+  { label: "Pinterest", icon: PinterestIcon, href: "https://www.pinterest.com" },
 ];
 
-export default function Sidebar({ open, onClose, onHome, onFavorites }: SidebarProps) {
+export default function Sidebar({ open, onClose, onHome, onFavorites, onNavigate }: SidebarProps) {
   return (
     <>
       {open && (
@@ -126,10 +127,9 @@ export default function Sidebar({ open, onClose, onHome, onFavorites }: SidebarP
               key={item.label}
               onClick={() => {
                 onClose();
-                if (item.label === "Home" || item.label === "Ver Produtos")
-                  onHome();
-                if (item.label === "Favoritos" && onFavorites)
-                  onFavorites();
+                if (item.target === "favorites") onFavorites?.();
+                else if (item.target === "home") onHome();
+                else onNavigate(item.target);
               }}
               className="w-full flex items-center gap-3 text-left px-4 py-3 rounded-lg font-body text-sm text-foreground-secondary hover:bg-surface hover:text-foreground-primary transition-colors cursor-pointer"
             >
@@ -144,15 +144,17 @@ export default function Sidebar({ open, onClose, onHome, onFavorites }: SidebarP
             Redes Sociais
           </span>
           <div className="flex items-center gap-2 mt-3">
-            {socialLinks.map(({ label, icon: Icon }) => (
-              <button
+            {socialLinks.map(({ label, icon: Icon, href }) => (
+              <a
                 key={label}
-                onClick={onClose}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 flex items-center justify-center rounded-full bg-surface hover:bg-foreground-primary hover:text-white transition-colors cursor-pointer"
                 title={label}
               >
                 <Icon size={18} />
-              </button>
+              </a>
             ))}
           </div>
         </div>
