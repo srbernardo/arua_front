@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, createContext, useContext, type ReactNode } from 'react'
+import { useState, useCallback, createContext, useContext, type ReactNode } from 'react'
 import { Check, X } from 'lucide-react'
 
 interface Toast {

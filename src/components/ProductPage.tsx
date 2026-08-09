@@ -5,8 +5,6 @@ import {
   Minus,
   Plus,
   Check,
-  Truck,
-  RotateCcw,
 } from "lucide-react";
 import type { Product } from "../types";
 import { useFavorites } from "../context/FavoritesContext";
@@ -26,7 +24,7 @@ export default function ProductPage({ product, onBack }: ProductPageProps) {
   const [added, setAdded] = useState(false);
   const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { addItem, setCartOpen } = useCart();
+  const { addItem } = useCart();
   const thumbRef = useRef<HTMLDivElement>(null);
 
   const favorited = isFavorite(product.id);
