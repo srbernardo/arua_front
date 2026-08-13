@@ -1,10 +1,6 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, type ReactNode } from 'react'
+import { Routes, Route, useNavigate, useLocation, useParams, Navigate } from 'react-router-dom'
 import TopBar from './components/TopBar'
-import CategoryBar from './components/CategoryBar'
-import FilterBar from './components/FilterBar'
-import ProductGrid from './components/ProductGrid'
-import LoadMoreButton from './components/LoadMoreButton'
-import Footer from './components/Footer'
 import Sidebar from './components/Sidebar'
 import CartDrawer from './components/CartDrawer'
 import CheckoutPage from './components/CheckoutPage'
@@ -17,31 +13,29 @@ import ProductPage from './components/ProductPage'
 import AboutPage from './components/AboutPage'
 import CustomerServicePage from './components/CustomerServicePage'
 import LegalPage, { type LegalSection } from './components/LegalPage'
+import HomePage from './pages/HomePage'
+import ScrollToTop from './components/ScrollToTop'
+import AdminLoginPage from './admin/AdminLoginPage'
+import AdminPlaceholderPage from './admin/AdminPlaceholderPage'
 import { useProducts } from './context/ProductsContext'
 import { useAuth } from './context/AuthContext'
 import { useCart } from './context/CartContext'
 import { useToast } from './lib/toast'
-import type { Product } from './types'
 
 const PAGE_SIZE = 12
 
 export default function App() {
   const { categories, products, loading, error } = useProducts()
   const { user } = useAuth()
-  const { setCartOpen } = useCart()
-  const { toast } = useToast()
+  const navigate = useNavigate()
+
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [filterOpen, setFilterOpen] = useState(false)
-  const [page, setPage] = useState<'home' | 'checkout' | 'order' | 'about' | 'service' | 'legal'>('home')
-  const [legalSection, setLegalSection] = useState<LegalSection>('cookies')
-  const [checkoutItemIds, setCheckoutItemIds] = useState<Set<number>>(new Set())
   const [authOpen, setAuthOpen] = useState(false)
   const [pendingCheckoutIds, setPendingCheckoutIds] = useState<Set<number> | null>(null)
   const [addressesOpen, setAddressesOpen] = useState(false)
   const [favoritesOpen, setFavoritesOpen] = useState(false)
   const [ordersOpen, setOrdersOpen] = useState(false)
-  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null)
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [sortBy, setSortBy] = useState('default')
   const [activeCategory, setActiveCategory] = useState('ver-todos')
   const [searchQuery, setSearchQuery] = useState('')
@@ -144,51 +138,39 @@ export default function App() {
   }
 
   function handleAuthSuccess() {
-    setSelectedProduct(null)
     if (pendingCheckoutIds) {
-      setCheckoutItemIds(pendingCheckoutIds)
+      const ids = pendingCheckoutIds
       setPendingCheckoutIds(null)
-      setPage('checkout')
+      navigate('/checkout', { state: { ids } })
     }
   }
 
   function handleOrderSelect(orderId: number) {
     setOrdersOpen(false)
-    setSelectedOrderId(orderId)
-    setPage('order')
+    navigate('/pedido/' + orderId)
   }
 
   function handleCheckout(ids: Set<number>) {
-    setSelectedProduct(null)
     if (user) {
-      setCheckoutItemIds(ids)
-      setPage('checkout')
+      navigate('/checkout', { state: { ids } })
     } else {
       setPendingCheckoutIds(ids)
       setAuthOpen(true)
     }
   }
 
-  function handleItemsUnavailable(message: string) {
-    setSelectedProduct(null)
-    toast(message, 'error')
-    setPage('home')
-    setCartOpen(true)
-  }
-
   const handleHome = useCallback(() => {
-    setSelectedProduct(null)
     if (window.location.hash) {
       history.replaceState(null, '', window.location.pathname + window.location.search)
     }
-    setPage('home')
+    navigate('/')
     setActiveCategory('ver-todos')
     setSearchQuery('')
     setActiveColor('')
     setActiveSize([])
     setSortBy('default')
     setVisibleCount(PAGE_SIZE)
-  }, [])
+  }, [navigate])
 
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query)
@@ -196,26 +178,19 @@ export default function App() {
   }, [])
 
   const handleNavigate = useCallback((target: string, anchor?: string) => {
-    setSelectedProduct(null)
+    let dest = ''
+    if (target === 'about') dest = '/sobre'
+    else if (target === 'service') dest = '/atendimento'
+    else dest = '/legal/' + target
+    if (anchor) dest += '#' + anchor
+    navigate(dest)
     if (anchor) {
-      const el = document.getElementById(anchor)
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      } else {
-        window.location.hash = anchor
-      }
-    } else {
-      window.scrollTo(0, 0)
+      setTimeout(() => {
+        const el = document.getElementById(anchor)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 100)
     }
-    if (target === 'about') {
-      setPage('about')
-    } else if (target === 'service') {
-      setPage('service')
-    } else {
-      setLegalSection(target as LegalSection)
-      setPage('legal')
-    }
-  }, [])
+  }, [navigate])
 
   const handleLoadMore = useCallback(() => {
     setVisibleCount((prev) => prev + PAGE_SIZE)
@@ -223,53 +198,19 @@ export default function App() {
 
   const hasMore = visibleCount < filtered.length
 
-  if (page === 'about') {
-    return <AboutPage onBack={handleHome} onNavigate={handleNavigate} />
-  }
-
-  if (page === 'service') {
-    return <CustomerServicePage onBack={handleHome} onNavigate={handleNavigate} />
-  }
-
-  if (page === 'legal') {
-    return <LegalPage section={legalSection} onBack={handleHome} onNavigate={handleNavigate} />
-  }
-
-  if (page === 'checkout') {
-    return <CheckoutPage onBack={() => setPage('home')} onItemsUnavailable={handleItemsUnavailable} checkoutItemIds={checkoutItemIds} />
-  }
-
-  if (page === 'order' && selectedOrderId) {
-    return <OrderDetailsPage orderId={selectedOrderId} onBack={() => setPage('home')} />
-  }
-
-  if (selectedProduct) {
-    return (
-      <>
-        <Sidebar
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          onHome={handleHome}
-          onFavorites={() => { setSidebarOpen(false); setFavoritesOpen(true) }}
-          onNavigate={handleNavigate}
-        />
-        <AddressesModal open={addressesOpen} onClose={() => setAddressesOpen(false)} />
-        <AuthModal isOpen={authOpen} onClose={() => { setAuthOpen(false); setPendingCheckoutIds(null) }} onSuccess={handleAuthSuccess} />
-        <FavoritesDrawer open={favoritesOpen} onClose={() => setFavoritesOpen(false)} />
-        <OrdersModal open={ordersOpen} onClose={() => setOrdersOpen(false)} onSelect={handleOrderSelect} />
-        <CartDrawer onCheckout={handleCheckout} onProductClick={(p) => setSelectedProduct(p)} />
-        <div className="w-full bg-card min-h-screen flex flex-col">
-          <TopBar onMenuClick={() => setSidebarOpen(true)} onSearch={handleSearch} onLogoClick={handleHome} onAddresses={() => setAddressesOpen(true)} onFavorites={() => setFavoritesOpen(true)} onLoginClick={() => setAuthOpen(true)} onOrders={() => setOrdersOpen(true)} />
-          <div className="pt-16 md:pt-20 flex-1 flex flex-col">
-            <ProductPage product={selectedProduct} onBack={() => setSelectedProduct(null)} />
-          </div>
-        </div>
-      </>
-    )
+  const topBarProps = {
+    onMenuClick: () => setSidebarOpen(true),
+    onSearch: handleSearch,
+    onLogoClick: handleHome,
+    onAddresses: () => setAddressesOpen(true),
+    onFavorites: () => setFavoritesOpen(true),
+    onLoginClick: () => setAuthOpen(true),
+    onOrders: () => setOrdersOpen(true),
   }
 
   return (
     <>
+      <ScrollToTop />
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -281,49 +222,150 @@ export default function App() {
       <AuthModal isOpen={authOpen} onClose={() => { setAuthOpen(false); setPendingCheckoutIds(null) }} onSuccess={handleAuthSuccess} />
       <FavoritesDrawer open={favoritesOpen} onClose={() => setFavoritesOpen(false)} />
       <OrdersModal open={ordersOpen} onClose={() => setOrdersOpen(false)} onSelect={handleOrderSelect} />
-      <CartDrawer onCheckout={handleCheckout} />
-      <div className="w-full bg-card min-h-screen flex flex-col">
-        <TopBar onMenuClick={() => setSidebarOpen(true)} onSearch={handleSearch} onLogoClick={handleHome} onAddresses={() => setAddressesOpen(true)} onFavorites={() => setFavoritesOpen(true)} onLoginClick={() => setAuthOpen(true)} onOrders={() => setOrdersOpen(true)} />
-        <div className="w-full flex flex-col flex-1 pt-16 md:pt-20">
-          <CategoryBar
-            categories={visibleCategories}
-            activeCategory={activeCategory}
-            onCategoryChange={handleCategoryChange}
-          />
-          <FilterBar
-            open={filterOpen}
-            onToggle={() => setFilterOpen(!filterOpen)}
-            sortBy={sortBy}
-            onSortChange={handleSortChange}
-            activeFilters={(sortBy !== 'default' ? 1 : 0) + (activeColor ? 1 : 0) + (activeSize.length > 0 ? 1 : 0)}
-            heading={heading}
-            colors={allColors}
-            activeColor={activeColor}
-            onColorChange={handleColorChange}
-            sizes={allSizes}
-            activeSize={activeSize}
-            onSizeChange={handleSizeChange}
-            onClearFilters={handleClearFilters}
-          />
-          <main className="flex flex-col px-4 md:px-6 py-6 pb-16 md:pb-20">
-            {loading ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="w-8 h-8 border-2 border-foreground-primary border-t-transparent rounded-full animate-spin" />
-              </div>
-            ) : error ? (
-              <div className="flex items-center justify-center py-20">
-                <span className="font-body text-sm text-destructive">{error}</span>
-              </div>
-            ) : (
-              <>
-                <ProductGrid products={filtered.slice(0, visibleCount)} defaultColor={activeColor} onProductClick={setSelectedProduct} />
-                {hasMore && <LoadMoreButton onLoadMore={handleLoadMore} />}
-              </>
-            )}
-          </main>
-        </div>
-        <Footer onNavigate={handleNavigate} />
-      </div>
+      <CartDrawer onCheckout={handleCheckout} onProductClick={(p) => navigate('/produto/' + p.id)} />
+
+      <Routes>
+        <Route path="/" element={
+          <StoreChrome {...topBarProps}>
+            <HomePage
+              loading={loading}
+              error={error}
+              visibleCategories={visibleCategories}
+              activeCategory={activeCategory}
+              onCategoryChange={handleCategoryChange}
+              filterOpen={filterOpen}
+              onToggleFilter={() => setFilterOpen(!filterOpen)}
+              sortBy={sortBy}
+              onSortChange={handleSortChange}
+              activeFilters={(sortBy !== 'default' ? 1 : 0) + (activeColor ? 1 : 0) + (activeSize.length > 0 ? 1 : 0)}
+              heading={heading}
+              colors={allColors}
+              activeColor={activeColor}
+              onColorChange={handleColorChange}
+              sizes={allSizes}
+              activeSize={activeSize}
+              onSizeChange={handleSizeChange}
+              onClearFilters={handleClearFilters}
+              filtered={filtered}
+              visibleCount={visibleCount}
+              hasMore={hasMore}
+              onLoadMore={handleLoadMore}
+              onProductClick={(p) => navigate('/produto/' + p.id)}
+              onNavigate={handleNavigate}
+            />
+          </StoreChrome>
+        } />
+
+        <Route path="/produto/:id" element={
+          <ProductRoute topBarProps={topBarProps} />
+        } />
+
+        <Route path="/checkout" element={
+          <CheckoutRoute />
+        } />
+
+        <Route path="/pedido/:id" element={
+          <OrderRoute />
+        } />
+
+        <Route path="/sobre" element={
+          <AboutPage onBack={() => navigate('/')} onNavigate={handleNavigate} />
+        } />
+
+        <Route path="/atendimento" element={
+          <CustomerServicePage onBack={() => navigate('/')} onNavigate={handleNavigate} />
+        } />
+
+        <Route path="/legal/:section" element={
+          <LegalRoute onNavigate={handleNavigate} />
+        } />
+
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin/*" element={<AdminPlaceholderPage />} />
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </>
+  )
+}
+
+function ProductRoute({ topBarProps }: { topBarProps: TopBarProps }) {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const productId = Number(id)
+  if (!Number.isInteger(productId) || productId <= 0) {
+    return <Navigate to="/" replace />
+  }
+  return (
+    <StoreChrome {...topBarProps}>
+      <ProductPage productId={productId} onBack={() => navigate('/')} />
+    </StoreChrome>
+  )
+}
+
+function CheckoutRoute() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { selectedIds, setCartOpen } = useCart()
+  const { toast } = useToast()
+
+  const checkoutItemIds = useMemo(
+    () => (location.state?.ids instanceof Set ? location.state.ids : selectedIds),
+    [location.state, selectedIds]
+  )
+
+  return (
+    <CheckoutPage
+      onBack={() => navigate('/')}
+      onItemsUnavailable={(message) => {
+        toast(message, 'error')
+        navigate('/')
+        setCartOpen(true)
+      }}
+      checkoutItemIds={checkoutItemIds}
+    />
+  )
+}
+
+function OrderRoute() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const orderId = Number(id)
+  if (!Number.isInteger(orderId) || orderId <= 0) {
+    return <Navigate to="/" replace />
+  }
+  return <OrderDetailsPage orderId={orderId} onBack={() => navigate('/')} />
+}
+
+function LegalRoute({ onNavigate }: { onNavigate: (target: string, anchor?: string) => void }) {
+  const { section } = useParams()
+  const navigate = useNavigate()
+  const valid: LegalSection[] = ['cookies-definitions', 'cookies', 'privacy', 'terms']
+  const current = valid.includes(section as LegalSection) ? (section as LegalSection) : 'cookies'
+  return <LegalPage section={current} onBack={() => navigate('/')} onNavigate={onNavigate} />
+}
+
+interface TopBarProps {
+  onMenuClick: () => void
+  onSearch: (query: string) => void
+  onLogoClick: () => void
+  onAddresses?: () => void
+  onFavorites?: () => void
+  onLoginClick: () => void
+  onOrders?: () => void
+}
+
+interface StoreChromeProps extends TopBarProps {
+  children: ReactNode
+}
+
+function StoreChrome({ children, ...topBar }: StoreChromeProps) {
+  return (
+    <div className="w-full bg-card min-h-screen flex flex-col">
+      <TopBar {...topBar} />
+      <div className="flex-1 flex flex-col">
+        {children}
+      </div>
+    </div>
   )
 }

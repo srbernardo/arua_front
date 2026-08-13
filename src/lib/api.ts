@@ -63,9 +63,10 @@ export const api = {
   },
   products: {
     list: (params?: Record<string, string>) => {
-      const qs = params ? `?${new URLSearchParams(params)}` : "";
+      const qs = params ? `?${new URLSearchParams(params)}` : ""
       return fetchAPI(`/products${qs}`);
     },
+    show: (id: number) => fetchAPI(`/products/${id}`),
   },
   users: {
     lookup: (phone: string) =>

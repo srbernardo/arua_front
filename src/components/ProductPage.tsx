@@ -10,13 +10,89 @@ import type { Product } from "../types";
 import { useFavorites } from "../context/FavoritesContext";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { api } from "../lib/api";
 
 interface ProductPageProps {
+  productId: number;
+  onBack: () => void;
+}
+
+export default function ProductPage({ productId, onBack }: ProductPageProps) {
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(false);
+    api.products
+      .show(productId)
+      .then((p) => {
+        if (active) setProduct(p);
+      })
+      .catch(() => {
+        if (active) setError(true);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [productId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <div className="flex items-center gap-3 px-4 md:px-8 h-12 shrink-0">
+          <button
+            onClick={onBack}
+            className="w-10 h-10 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
+          >
+            <ChevronLeft size={22} className="text-neutral-600" />
+          </button>
+          <span className="font-body text-sm text-neutral-500">Carregando...</span>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col">
+        <div className="flex items-center gap-3 px-4 md:px-8 h-12 shrink-0">
+          <button
+            onClick={onBack}
+            className="w-10 h-10 flex items-center justify-center cursor-pointer hover:opacity-70 transition-opacity"
+          >
+            <ChevronLeft size={22} className="text-neutral-600" />
+          </button>
+          <span className="font-body text-sm text-neutral-500 truncate">
+            {product?.name ?? "Produto"}
+          </span>
+        </div>
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+          <span className="font-body text-sm text-neutral-400">
+            Produto não encontrado
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return <ProductView product={product} onBack={onBack} />;
+}
+
+interface ProductViewProps {
   product: Product;
   onBack: () => void;
 }
 
-export default function ProductPage({ product, onBack }: ProductPageProps) {
+function ProductView({ product, onBack }: ProductViewProps) {
   const [selectedColor, setSelectedColor] = useState(product.colors[0] ?? "");
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedImgIndex, setSelectedImgIndex] = useState(0);
