@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { X, Minus, Plus, Trash2, ShoppingCart, Check } from 'lucide-react'
-import { useCart } from '../context/CartContext'
+import { X, Minus, Plus, Trash2, ShoppingCart, Check, Ban } from 'lucide-react'
+import { useCart, isUnavailable, type CartItem } from '../context/CartContext'
 import type { Product } from '../types'
 
 interface CartDrawerProps {
@@ -11,7 +11,8 @@ interface CartDrawerProps {
 export default function CartDrawer({ onCheckout, onProductClick }: CartDrawerProps) {
   const { items, cartOpen, setCartOpen, removeItem, updateQuantity, selectedIds, setSelectedIds } = useCart()
 
-  const allSelected = items.length > 0 && items.every((i) => selectedIds.has(i.id))
+  const availableItems = useMemo(() => items.filter((i) => !isUnavailable(i)), [items])
+  const allSelected = availableItems.length > 0 && availableItems.every((i) => selectedIds.has(i.id))
 
   function toggleSelect(id: number) {
     setSelectedIds((prev) => {
@@ -26,7 +27,7 @@ export default function CartDrawer({ onCheckout, onProductClick }: CartDrawerPro
     if (allSelected) {
       setSelectedIds(new Set())
     } else {
-      setSelectedIds(new Set(items.map((i) => i.id)))
+      setSelectedIds(new Set(availableItems.map((i) => i.id)))
     }
   }
 
@@ -103,23 +104,29 @@ export default function CartDrawer({ onCheckout, onProductClick }: CartDrawerPro
         ) : (
           <>
             <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4">
-              {items.map((item) => (
-                <div key={item.id} className="flex gap-4 pb-4 border-b border-border last:border-0">
+              {items.map((item) => {
+                const unavailable = isUnavailable(item)
+                return (
+                <div key={item.id} className={`flex gap-4 pb-4 border-b border-border last:border-0 ${unavailable ? 'opacity-50' : ''}`}>
                   <div className="flex flex-col items-center gap-2 pt-1">
-                    <button
-                      onClick={() => toggleSelect(item.id)}
-                      className={`w-4 h-4 rounded-sm border flex items-center justify-center transition-colors cursor-pointer ${
-                        selectedIds.has(item.id) ? 'bg-foreground-primary border-foreground-primary' : 'border-foreground-secondary/40'
-                      }`}
-                    >
-                      {selectedIds.has(item.id) && <Check size={12} className="text-white" />}
-                    </button>
+                    {unavailable ? (
+                      <Ban size={14} className="text-foreground-secondary/50 mt-1" />
+                    ) : (
+                      <button
+                        onClick={() => toggleSelect(item.id)}
+                        className={`w-4 h-4 rounded-sm border flex items-center justify-center transition-colors cursor-pointer ${
+                          selectedIds.has(item.id) ? 'bg-foreground-primary border-foreground-primary' : 'border-foreground-secondary/40'
+                        }`}
+                      >
+                        {selectedIds.has(item.id) && <Check size={12} className="text-white" />}
+                      </button>
+                    )}
                   </div>
                   <div className="w-20 h-24 shrink-0 rounded-lg overflow-hidden bg-surface">
                     <img
                       src={item.product.images_by_color[0]?.images[0]?.url ?? ''}
                       alt={item.product.name}
-                      className="w-full h-full object-cover"
+                      className={`w-full h-full object-cover ${unavailable ? 'grayscale blur-[1px]' : ''}`}
                     />
                   </div>
                   <div className="flex-1 flex flex-col justify-between min-w-0">
@@ -146,29 +153,37 @@ export default function CartDrawer({ onCheckout, onProductClick }: CartDrawerPro
                         <Trash2 size={16} className="text-foreground-secondary/60 hover:text-destructive transition-colors" />
                       </button>
                     </div>
-                    <span className="font-heading text-sm font-semibold text-black">
+                    <span className={`font-heading text-sm font-semibold ${unavailable ? 'text-foreground-secondary/70' : 'text-black'}`}>
                       {(item.product.price * item.quantity).toFixed(2)} €
                     </span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-7 h-7 flex items-center justify-center rounded-full bg-surface hover:bg-surface/80 transition-colors cursor-pointer"
-                      >
-                        <Minus size={14} className="text-foreground-secondary" />
-                      </button>
-                      <span className="font-body text-sm font-medium text-foreground-primary w-6 text-center">
-                        {item.quantity}
+                    {unavailable ? (
+                      <span className="font-body text-xs font-medium text-red-500 flex items-center gap-1">
+                        Esgotado — remova para continuar
                       </span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-7 h-7 flex items-center justify-center rounded-full bg-surface hover:bg-surface/80 transition-colors cursor-pointer"
-                      >
-                        <Plus size={14} className="text-foreground-secondary" />
-                      </button>
-                    </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          className="w-7 h-7 flex items-center justify-center rounded-full bg-surface hover:bg-surface/80 transition-colors cursor-pointer"
+                        >
+                          <Minus size={14} className="text-foreground-secondary" />
+                        </button>
+                        <span className="font-body text-sm font-medium text-foreground-primary w-6 text-center">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          disabled={item.quantity >= getItemStock(item)}
+                          className="w-7 h-7 flex items-center justify-center rounded-full bg-surface hover:bg-surface/80 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <Plus size={14} className="text-foreground-secondary" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
 
             <div className="border-t border-border p-4 md:p-6 flex flex-col gap-4">
@@ -177,7 +192,7 @@ export default function CartDrawer({ onCheckout, onProductClick }: CartDrawerPro
                   Subtotal{selectedCount > 0 && ` (${selectedCount} ${selectedCount === 1 ? 'item' : 'itens'})`}
                 </span>
                 <span className="font-heading text-lg font-bold text-foreground-primary">
-                  {(selectedCount > 0 ? selectedTotal : items.reduce((sum, i) => sum + i.product.price * i.quantity, 0)).toFixed(2)} €
+                  {(selectedCount > 0 ? selectedTotal : availableItems.reduce((sum, i) => sum + i.product.price * i.quantity, 0)).toFixed(2)} €
                 </span>
               </div>
               <button
@@ -196,4 +211,12 @@ export default function CartDrawer({ onCheckout, onProductClick }: CartDrawerPro
       </div>
     </>
   )
+}
+
+function getItemStock(item: CartItem): number {
+  if (typeof item.variant.stock === 'number') return item.variant.stock
+  const variant = item.product.variants?.find(
+    (v) => v.size === item.variant.size && v.color === item.variant.color
+  )
+  return variant?.stock ?? item.quantity
 }

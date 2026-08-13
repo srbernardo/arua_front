@@ -9,6 +9,7 @@ export interface CartItem {
     size: string
     color: string
     sku: string
+    stock?: number
   }
   quantity: number
 }
@@ -44,7 +45,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setSelectedIds((prev) => {
-      const ids = new Set(items.map((i) => i.id))
+      const ids = new Set(items.filter((i) => !isUnavailable(i)).map((i) => i.id))
       const pruned = [...prev].filter((id) => ids.has(id))
       return pruned.length === prev.size ? prev : new Set(pruned)
     })
@@ -66,9 +67,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback(async (product: Product, variant: Variant, quantity = 1) => {
     const prevItems = itemsRef.current
-    const existingId = prevItems.find(
+    const existing = prevItems.find(
       (i) => i.product.id === product.id && i.variant.size === variant.size && i.variant.color === variant.color
-    )?.id
+    )
 
     const markSelected = (id: number | undefined) => {
       if (id == null) return
@@ -80,24 +81,35 @@ export function CartProvider({ children }: { children: ReactNode }) {
       })
     }
 
+    const stock = variant.stock ?? 0
+    const clamped = Math.max(0, Math.min(quantity, stock - (existing?.quantity ?? 0)))
+    if (clamped <= 0) {
+      markSelected(existing?.id)
+      return
+    }
+
     try {
-      const data = await api.cart.addItem(variant.id, quantity)
+      const data = await api.cart.addItem(variant.id, clamped)
       const next = data.items.map(mapCartItem)
       setItems(next)
-      const addedId = next.find((i: CartItem) => !prevItems.some((p) => p.id === i.id))?.id ?? existingId
+      const addedId = next.find((i: CartItem) => !prevItems.some((p) => p.id === i.id))?.id ?? existing?.id
       markSelected(addedId)
-    } catch {
-      if (existingId != null) {
-        markSelected(existingId)
+    } catch (err) {
+      if (isStockError(err)) {
+        markSelected(existing?.id)
+        return
+      }
+      if (existing != null) {
+        markSelected(existing.id)
         setItems((prev) =>
           prev.map((i) =>
             i.product.id === product.id && i.variant.size === variant.size && i.variant.color === variant.color
-              ? { ...i, quantity: i.quantity + quantity }
+              ? { ...i, quantity: Math.min(stock, i.quantity + clamped) }
               : i
           )
         )
       } else {
-        const newItem = { id: Date.now(), product, variant: { size: variant.size, color: variant.color, sku: variant.sku }, quantity }
+        const newItem = { id: Date.now(), product, variant: { size: variant.size, color: variant.color, sku: variant.sku }, quantity: clamped }
         markSelected(newItem.id)
         setItems((prev) => [...prev, newItem])
       }
@@ -118,17 +130,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem(cartItemId)
       return
     }
+    const current = itemsRef.current.find((i) => i.id === cartItemId)
+    const max = current ? getVariantStock(current) : undefined
+    const clamped = max != null ? Math.max(1, Math.min(quantity, max)) : quantity
     try {
-      const data = await api.cart.updateItem(cartItemId, quantity)
+      const data = await api.cart.updateItem(cartItemId, clamped)
       setItems(data.items.map(mapCartItem))
-    } catch {
+    } catch (err) {
+      if (isStockError(err)) return
       setItems((prev) =>
         prev.map((i) =>
-          i.id === cartItemId ? { ...i, quantity } : i
+          i.id === cartItemId ? { ...i, quantity: clamped } : i
         )
       )
     }
-  }, [items, removeItem])
+  }, [removeItem])
 
   const clearCart = useCallback(async () => {
     try {
@@ -185,4 +201,21 @@ function mapCartItem(item: any): CartItem {
     variant: item.variant,
     quantity: item.quantity,
   }
+}
+
+function getVariantStock(item: CartItem): number | undefined {
+  if (typeof item.variant.stock === 'number') return item.variant.stock
+  const variant = item.product.variants?.find(
+    (v) => v.size === item.variant.size && v.color === item.variant.color
+  )
+  return variant?.stock
+}
+
+export function isUnavailable(item: CartItem): boolean {
+  const stock = getVariantStock(item)
+  return stock != null && stock <= 0
+}
+
+function isStockError(err: unknown): boolean {
+  return (err as { status?: number })?.status === 422
 }
