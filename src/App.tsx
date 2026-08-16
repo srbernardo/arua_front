@@ -16,7 +16,15 @@ import LegalPage, { type LegalSection } from './components/LegalPage'
 import HomePage from './pages/HomePage'
 import ScrollToTop from './components/ScrollToTop'
 import AdminLoginPage from './admin/AdminLoginPage'
-import AdminPlaceholderPage from './admin/AdminPlaceholderPage'
+import AdminLayout from './admin/AdminLayout'
+import RequireAdmin from './admin/RequireAdmin'
+import DashboardPage from './admin/pages/DashboardPage'
+import ProductsPage from './admin/pages/ProductsPage'
+import ProductFormPage from './admin/pages/ProductFormPage'
+import CategoriesPage from './admin/pages/CategoriesPage'
+import OrdersPage from './admin/pages/OrdersPage'
+import AdminOrderDetailsPage from './admin/pages/OrderDetailsPage'
+import UsersPage from './admin/pages/UsersPage'
 import { useProducts } from './context/ProductsContext'
 import { useAuth } from './context/AuthContext'
 import { useCart } from './context/CartContext'
@@ -281,7 +289,23 @@ export default function App() {
         } />
 
         <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route path="/admin/*" element={<AdminPlaceholderPage />} />
+        <Route
+          path="/admin"
+          element={
+            <RequireAdmin>
+              <AdminLayout />
+            </RequireAdmin>
+          }
+        >
+          <Route index element={<DashboardPage />} />
+          <Route path="produtos" element={<ProductsPage />} />
+          <Route path="produtos/novo" element={<ProductFormPage />} />
+          <Route path="produtos/:id/editar" element={<ProductFormPage />} />
+          <Route path="categorias" element={<CategoriesPage />} />
+          <Route path="pedidos" element={<OrdersPage />} />
+          <Route path="pedidos/:id" element={<AdminOrderDetailsPage />} />
+          <Route path="utilizadores" element={<UsersPage />} />
+        </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
