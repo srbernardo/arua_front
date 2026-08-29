@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Package, Tags, ShoppingCart, Users, LogOut } from 'lucide-react'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { LayoutDashboard, Package, Tags, ShoppingCart, Users, LogOut, ChevronRight } from 'lucide-react'
 import { adminApi } from '../lib/adminApi'
 
 const NAV_ITEMS = [
@@ -11,8 +11,29 @@ const NAV_ITEMS = [
   { to: '/admin/utilizadores', label: 'Utilizadores', icon: Users },
 ]
 
+function useBreadcrumb(): string[] {
+  const { pathname } = useLocation()
+  const parts = pathname.replace(/^\/admin\/?/, '').split('/').filter(Boolean)
+  const labels: Record<string, string> = {
+    produtos: 'Produtos',
+    categorias: 'Categorias',
+    pedidos: 'Pedidos',
+    utilizadores: 'Utilizadores',
+    novo: 'Novo',
+    editar: 'Editar',
+  }
+  const crumbs = ['Admin']
+  parts.forEach((part) => {
+    if (labels[part]) crumbs.push(labels[part])
+    else if (/^\d+$/.test(part)) crumbs.push(`#${part}`)
+    else crumbs.push(part)
+  })
+  return crumbs
+}
+
 export default function AdminLayout() {
   const navigate = useNavigate()
+  const crumbs = useBreadcrumb()
   const [email, setEmail] = useState<string | null>(null)
   const [loggingOut, setLoggingOut] = useState(false)
 
@@ -65,7 +86,9 @@ export default function AdminLayout() {
           ))}
         </nav>
         <div className="px-4 py-4 border-t border-gray-800 flex items-center justify-between gap-2">
-          <span className="font-body text-xs text-gray-400 truncate">{email ?? '…'}</span>
+          <span className="font-body text-xs text-gray-400 truncate" title={email ?? undefined}>
+            {email ?? '…'}
+          </span>
           <button
             onClick={handleLogout}
             disabled={loggingOut}
@@ -76,9 +99,24 @@ export default function AdminLayout() {
           </button>
         </div>
       </aside>
-      <main className="flex-1 p-8 overflow-x-hidden">
-        <Outlet />
-      </main>
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0">
+          <nav className="flex items-center gap-1.5 font-body text-sm" aria-label="Localização atual">
+            {crumbs.map((crumb, i) => (
+              <span key={i} className="flex items-center gap-1.5">
+                {i > 0 && <ChevronRight size={14} className="text-gray-400" />}
+                <span className={i === crumbs.length - 1 ? 'text-gray-900 font-medium' : 'text-gray-400'}>
+                  {crumb}
+                </span>
+              </span>
+            ))}
+          </nav>
+          <span className="font-body text-xs text-gray-500 truncate">Sessão: {email ?? '…'}</span>
+        </header>
+        <main className="flex-1 p-8 overflow-x-hidden">
+          <Outlet />
+        </main>
+      </div>
     </div>
   )
 }
