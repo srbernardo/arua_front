@@ -6,9 +6,33 @@ export interface AdminUser {
   created_at?: string
 }
 
-interface ApiError extends Error {
+export interface PaginationMeta {
+  page: number
+  per_page: number
+  total: number
+  total_pages: number
+}
+
+export interface Paginated<T> {
+  data: T[]
+  meta: PaginationMeta
+}
+
+export interface ApiError extends Error {
   status: number
   data: unknown
+}
+
+export function isApiError(err: unknown): err is ApiError {
+  return err instanceof Error && "status" in err
+}
+
+export function errorMessage(err: unknown, fallback: string): string {
+  if (!isApiError(err)) return fallback
+  const data = err.data as { error?: string; errors?: string[] } | null
+  if (data?.error) return data.error
+  if (data?.errors?.length) return data.errors.join(". ")
+  return fallback
 }
 
 // Authentication is session/cookie based: the browser stores the HttpOnly
@@ -31,11 +55,16 @@ export function clearAuthState() {
 }
 
 async function request<T = unknown>(path: string, options: RequestInit = {}): Promise<T> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+  const method = (options.method ?? "GET").toUpperCase()
+
+  const headers: Record<string, string> = {}
+  // multipart/form-data must NOT set Content-Type: the browser generates it
+  // (with the correct boundary) automatically.
+  const isFormData = options.body instanceof FormData
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json"
   }
 
-  const method = (options.method ?? "GET").toUpperCase()
   if (method !== "GET" && method !== "HEAD" && csrfToken) {
     headers["X-CSRF-Token"] = csrfToken
   }
@@ -88,6 +117,18 @@ async function ensureCsrfToken() {
   }
 }
 
+function buildQuery(params?: Record<string, string | number | undefined | null>) {
+  if (!params) return ""
+  const qs = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== "") {
+      qs.set(key, String(value))
+    }
+  }
+  const str = qs.toString()
+  return str ? `?${str}` : ""
+}
+
 export const adminApi = {
   async login(email: string, password: string): Promise<AdminUser> {
     await ensureCsrfToken()
@@ -116,21 +157,30 @@ export const adminApi = {
       const data = await request<{ admin: AdminUser }>("/admin/me")
       return data.admin
     } catch (err) {
-      if ((err as ApiError).status === 401) return null
+      if (isApiError(err) && err.status === 401) return null
       throw err
     }
   },
 
-  get: <T = unknown>(path: string) => request<T>(path),
+  get: <T = unknown>(path: string, params?: Record<string, string | number | undefined | null>) =>
+    request<T>(`${path}${buildQuery(params)}`),
+
   post: <T = unknown>(path: string, body?: unknown) =>
     request<T>(path, {
       method: "POST",
       body: body === undefined ? undefined : JSON.stringify(body),
     }),
+
+  // Sends a multipart/form-data body (product creation/update with images).
+  // No Content-Type header: the browser sets it with the correct boundary.
+  upload: <T = unknown>(path: string, formData: FormData, method: "POST" | "PATCH" = "POST") =>
+    request<T>(path, { method, body: formData }),
+
   patch: <T = unknown>(path: string, body?: unknown) =>
     request<T>(path, {
       method: "PATCH",
       body: body === undefined ? undefined : JSON.stringify(body),
     }),
+
   delete: <T = unknown>(path: string) => request<T>(path, { method: "DELETE" }),
 }
