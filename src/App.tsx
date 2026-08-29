@@ -19,11 +19,11 @@ import AdminLoginPage from './admin/AdminLoginPage'
 import AdminLayout from './admin/AdminLayout'
 import RequireAdmin from './admin/RequireAdmin'
 import DashboardPage from './admin/pages/DashboardPage'
-import ProductsPage from './admin/pages/ProductsPage'
+import ProductsListPage from './admin/pages/ProductsListPage'
 import ProductFormPage from './admin/pages/ProductFormPage'
 import CategoriesPage from './admin/pages/CategoriesPage'
 import OrdersPage from './admin/pages/OrdersPage'
-import AdminOrderDetailsPage from './admin/pages/OrderDetailsPage'
+import AdminOrderDetailPage from './admin/pages/OrderDetailPage'
 import UsersPage from './admin/pages/UsersPage'
 import { useProducts } from './context/ProductsContext'
 import { useAuth } from './context/AuthContext'
@@ -298,12 +298,12 @@ export default function App() {
           }
         >
           <Route index element={<DashboardPage />} />
-          <Route path="produtos" element={<ProductsPage />} />
+          <Route path="produtos" element={<ProductsListPage />} />
           <Route path="produtos/novo" element={<ProductFormPage />} />
           <Route path="produtos/:id/editar" element={<ProductFormPage />} />
           <Route path="categorias" element={<CategoriesPage />} />
           <Route path="pedidos" element={<OrdersPage />} />
-          <Route path="pedidos/:id" element={<AdminOrderDetailsPage />} />
+          <Route path="pedidos/:id" element={<AdminOrderDetailPage />} />
           <Route path="utilizadores" element={<UsersPage />} />
         </Route>
 
