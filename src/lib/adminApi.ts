@@ -109,7 +109,6 @@ async function request<T = unknown>(path: string, options: RequestInit = {}): Pr
 }
 
 async function ensureCsrfToken() {
-  if (csrfToken) return
   try {
     await request("/admin/me")
   } catch {
