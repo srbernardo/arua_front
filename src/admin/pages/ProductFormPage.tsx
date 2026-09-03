@@ -336,59 +336,59 @@ export default function ProductFormPage() {
             {variants.map((variant) => (
               <div
                 key={variant.key}
-                className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_1fr_1.2fr_auto] gap-2 items-end border border-gray-100 rounded-lg p-3"
+                className="grid grid-cols-2 lg:grid-cols-[1fr_1fr_0.8fr_1.2fr_auto] gap-3 items-end border border-gray-100 rounded-lg p-3 min-w-0"
               >
-                <label className="flex flex-col gap-1">
+                <label className="flex flex-col gap-1 min-w-0">
                   <span className="font-body text-[11px] font-medium text-gray-500">Tamanho</span>
                   <input
                     value={variant.size}
                     onChange={(e) => handleUpdateVariant(variant.key, 'size', e.target.value)}
                     placeholder="Ex.: M"
-                    className="h-9 px-2.5 rounded-lg bg-gray-50 border border-gray-200 text-sm font-body text-gray-900 placeholder-gray-400 outline-none focus:border-gray-400 transition-colors"
+                    className="h-9 w-full min-w-0 px-2.5 rounded-lg bg-gray-50 border border-gray-200 text-sm font-body text-gray-900 placeholder-gray-400 outline-none focus:border-gray-400 transition-colors"
                   />
                 </label>
-                <label className="flex flex-col gap-1">
+                <label className="flex flex-col gap-1 min-w-0">
                   <span className="font-body text-[11px] font-medium text-gray-500">Cor</span>
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-1.5 min-w-0">
                     <input
                       value={variant.color}
                       onChange={(e) => handleUpdateVariant(variant.key, 'color', e.target.value)}
                       placeholder="#D4916E"
-                      className="h-9 flex-1 min-w-0 px-2.5 rounded-lg bg-gray-50 border border-gray-200 text-xs font-body text-gray-900 placeholder-gray-400 outline-none focus:border-gray-400 transition-colors"
+                      className="h-9 w-full flex-1 min-w-0 px-2.5 rounded-lg bg-gray-50 border border-gray-200 text-xs font-body text-gray-900 placeholder-gray-400 outline-none focus:border-gray-400 transition-colors"
                     />
                     <input
                       type="color"
                       value={/^#[0-9a-fA-F]{6}$/.test(variant.color) ? variant.color : '#000000'}
                       onChange={(e) => handleUpdateVariant(variant.key, 'color', e.target.value)}
-                      className="h-9 w-9 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer"
+                      className="h-9 w-9 shrink-0 rounded-lg border border-gray-200 bg-gray-50 cursor-pointer"
                       aria-label="Escolher cor"
                     />
                   </div>
                 </label>
-                <label className="flex flex-col gap-1">
+                <label className="flex flex-col gap-1 min-w-0">
                   <span className="font-body text-[11px] font-medium text-gray-500">Stock</span>
                   <input
                     value={variant.stock}
                     onChange={(e) => handleUpdateVariant(variant.key, 'stock', e.target.value)}
                     type="number"
                     min="0"
-                    className="h-9 px-2.5 rounded-lg bg-gray-50 border border-gray-200 text-sm font-body text-gray-900 outline-none focus:border-gray-400 transition-colors"
+                    className="h-9 w-full min-w-0 px-2.5 rounded-lg bg-gray-50 border border-gray-200 text-sm font-body text-gray-900 outline-none focus:border-gray-400 transition-colors"
                   />
                 </label>
-                <label className="flex flex-col gap-1">
+                <label className="flex flex-col gap-1 min-w-0">
                   <span className="font-body text-[11px] font-medium text-gray-500">SKU</span>
                   <input
                     value={variant.sku}
                     onChange={(e) => handleUpdateVariant(variant.key, 'sku', e.target.value)}
                     placeholder="Opcional"
-                    className="h-9 px-2.5 rounded-lg bg-gray-50 border border-gray-200 text-sm font-body text-gray-900 placeholder-gray-400 outline-none focus:border-gray-400 transition-colors"
+                    className="h-9 w-full min-w-0 px-2.5 rounded-lg bg-gray-50 border border-gray-200 text-sm font-body text-gray-900 placeholder-gray-400 outline-none focus:border-gray-400 transition-colors"
                   />
                 </label>
                 <button
                   type="button"
                   onClick={() => handleRemoveVariant(variant.key)}
                   disabled={variants.length === 1}
-                  className="h-9 w-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="col-span-2 lg:col-span-1 h-9 w-9 justify-self-end flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                   title={variants.length === 1 ? 'É preciso pelo menos uma variante' : 'Remover variante'}
                 >
                   <Trash2 size={15} />
