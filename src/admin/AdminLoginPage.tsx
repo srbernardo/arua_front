@@ -29,9 +29,9 @@ export default function AdminLoginPage() {
     } catch (err) {
       const status = (err as { status?: number }).status
       if (status === 401) {
-        setError('Email ou senha inválidos.')
+        setError(err instanceof Error ? err.message : 'Email ou senha incorretos.')
       } else {
-        setError('Não foi possível ligar ao servidor. Tente novamente.')
+        setError(err instanceof Error ? err.message : 'Não foi possível ligar ao servidor.')
       }
     } finally {
       setLoading(false)
