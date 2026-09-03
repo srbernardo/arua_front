@@ -24,6 +24,7 @@ interface OrderDetail {
   shipping: number
   total: number
   whatsapp_url: string | null
+  observation: string | null
   created_at: string
   items: Array<{
     id: number
@@ -91,6 +92,15 @@ export default function OrderDetailsPage({ orderId, onBack }: OrderDetailsPagePr
             <p className="font-body text-xs text-neutral-400 mb-6">
               {formatDate(order.created_at)}
             </p>
+
+            {order.status === 'cancelled' && order.observation && (
+              <div className="rounded-xl bg-red-50 border border-red-100 p-4 mb-6">
+                <p className="font-body text-sm font-semibold text-red-700 mb-1">
+                  Motivo do cancelamento
+                </p>
+                <p className="font-body text-sm text-red-600">{order.observation}</p>
+              </div>
+            )}
 
             <h4 className="font-heading text-sm font-semibold text-black mb-3">
               Itens

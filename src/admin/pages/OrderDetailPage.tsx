@@ -34,6 +34,7 @@ interface AdminOrder {
   total: number
   items: OrderItem[]
   user: { id: number; name: string; phone: string }
+  observation: string | null
   created_at: string
 }
 
@@ -64,12 +65,15 @@ export default function AdminOrderDetailPage() {
   const [state, setState] = useState<LoadState>('loading')
   const [errorMsg, setErrorMsg] = useState('')
   const [updating, setUpdating] = useState(false)
+  const [observation, setObservation] = useState('')
+  const [savingObservation, setSavingObservation] = useState(false)
 
   const load = useCallback(async () => {
     setState('loading')
     try {
       const data = await adminApi.get<AdminOrder>(`/admin/orders/${id}`)
       setOrder(data)
+      setObservation(data.observation ?? '')
       setState('ready')
     } catch (err) {
       if (isApiError(err) && err.status === 401) return
@@ -237,6 +241,37 @@ export default function AdminOrderDetailPage() {
             </span>
           </div>
         </div>
+      </section>
+
+      <section className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-body text-sm font-semibold text-gray-900">Observação</h2>
+          <button
+            onClick={async () => {
+              setSavingObservation(true)
+              try {
+                await adminApi.patch(`/admin/orders/${order.id}`, { order: { observation } })
+                setOrder((prev) => (prev ? { ...prev, observation } : prev))
+                toast('Observação guardada.')
+              } catch (err) {
+                toast(errorMessage(err, 'Não foi possível guardar a observação.'), 'error')
+              } finally {
+                setSavingObservation(false)
+              }
+            }}
+            disabled={savingObservation}
+            className="h-8 px-3 rounded-lg bg-gray-900 text-white font-body text-xs font-medium hover:bg-gray-800 transition-colors cursor-pointer disabled:opacity-50"
+          >
+            {savingObservation ? 'A guardar…' : 'Guardar'}
+          </button>
+        </div>
+        <textarea
+          value={observation}
+          onChange={(e) => setObservation(e.target.value)}
+          placeholder="Motivo de cancelamento ou outra observação (ex.: o cliente cancelou o pedido porque…)"
+          rows={4}
+          className="w-full rounded-lg border border-gray-200 px-3 py-2.5 font-body text-sm text-gray-900 outline-none focus:border-gray-400 transition-colors resize-y"
+        />
       </section>
     </div>
   )
